@@ -5,8 +5,8 @@
 #include <random>
 #include <string>
 
-#include "CSMACDAnalyzer.hpp"
-#include "CSMACDSimulator.hpp"
+#include "NetworkAnalyzer.hpp"
+#include "UniformBusSimulatorConfigurer.hpp"
 
 const bool REQUIRE_POSITIVE = true;
 const bool ALLOW_NEGATIVE = false;
@@ -177,7 +177,7 @@ bool validateSettings(
  * The results may be outputted either to the console or to a file.
  */
 void runAnalysis(
-	CSMACDAnalyzer *analyzer,
+	NetworkAnalyzer *analyzer,
 	Seconds simulationDuration,
 	Nodes nodesSingle,
 	Nodes nodesLower,
@@ -236,10 +236,10 @@ void runAnalysis(
 			<< channelTransmissionRate << ","
 			<< frameLength << ","
 			<< interNodeDistance << ","
-			<< ((persistent) ? "" : "non-") << "persistent\n"
+			<< ((persistent) ? "" : "non-") << "persistent\n\n"
 			<< std::flush;
 
-		// add statistical data for each rho value as CSV rows with a header
+		// add statistical data for each N (number of nodes) value as CSV rows with a header
 		analyzer->writeHeaders(output);
 		if (nodesSingle > 0)
 		{
@@ -277,25 +277,25 @@ int main(int argc, char *argv[])
 {
 	showUsage();
 
-	// the packet queue state; the simulation duration, transmission rate and max buffer size may be updated throughout the session
-	Bus bus;
+	// the bus network state; the bus's parameters and contents may be updated throughout the session
+	UniformBus bus;
 
-	// runs events against the packet queue state
-	CSMACDSimulator simulator(&bus); 
+	// runs events against the bus network's state; the simulation duration may be updated throughout the session
+	NetworkSimulator simulator(&bus); 
 
-	// runs the experiments using the simulator and logs the data
-	CSMACDAnalyzer analyzer(&simulator);
+	// configures network experiments for different numbers of nodes
+	UniformBusSimulatorConfigurer configurer(&bus, &simulator);
+
+	// uses the experiment configurer to generate statistical data with respect changing numbers of nodes
+	NetworkAnalyzer analyzer(&configurer);
 
 	// simulation settings; these may be updated throughout the session
-	Nodes nodesSingle;
-	Nodes nodesLower;
-	Nodes nodesUpper;
-	Nodes nodesStep;
-	FramesPerSecond averageFrameArrivalRate = 0;
+	Nodes nodesSingle = 0;
+	Nodes nodesLower = 0;
+	Nodes nodesUpper = 0;
+	Nodes nodesStep = 0;
 	BitsPerSecond channelTransmissionRate = 0;
 	Bits frameLength = 0;
-	Meters interNodeDistance = 0;
-	MetersPerSecond channelPropagationSpeed = 0;
 	bool persistent = true;
 
 	bool succeeded = false;
@@ -383,11 +383,11 @@ int main(int argc, char *argv[])
 				<< "nl <N lower (long)>: " << nodesLower << "\n"
 				<< "nu <N upper (long)>: " << nodesUpper << "\n"
 				<< "ns <N step size (long)>: " << nodesStep << "\n"
-				<< "a <average frame arrival rate in frames per second (long)>: " << averageFrameArrivalRate << "\n"
-				<< "r <channel transmission rate in bits per second (long)>: " << channelTransmissionRate << "\n"
-				<< "l <frame length in bits for all frames (long)>: " << frameLength << "\n"
-				<< "d <distance between adjacent nodes on the bus in meters (double)>: " << interNodeDistance << "\n"
-				<< "p <channel signal propagation speed in meters per second (double)>: " << channelPropagationSpeed << "\n"
+				<< "a <average frame arrival rate in frames per second (long)>: " << bus.averageFrameArrivalRate << "\n"
+				<< "r <channel transmission rate in bits per second (long)>: " << bus.channelTransmissionRate << "\n"
+				<< "l <frame length in bits for all frames (long)>: " << bus.frameLength << "\n"
+				<< "d <distance between adjacent nodes on the bus in meters (double)>: " << bus.interNodeDistance << "\n"
+				<< "p <channel signal propagation speed in meters per second (double)>: " << bus.channelPropagationSpeed << "\n"
 				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n"
 				<< std::flush;
 			break;
@@ -412,6 +412,12 @@ int main(int argc, char *argv[])
 
 			if (successfullyParsed)
 			{
+				// calculate the transmission time for all frames _once_ if possible
+				if ((bus.channelTransmissionRate > 0) && (bus.frameLength > 0))
+				{
+					bus.frameTransmissionTime = ((double)bus.frameLength) / ((double)bus.channelTransmissionRate);
+				}
+
 				runAnalysis(
 					&analyzer,
 					simulator.simulationDuration,
@@ -419,11 +425,11 @@ int main(int argc, char *argv[])
 					nodesLower,
 					nodesUpper,
 					nodesStep,
-					averageFrameArrivalRate,
+					bus.averageFrameArrivalRate,
 					channelTransmissionRate,
 					frameLength,
-					interNodeDistance,
-					channelPropagationSpeed,
+					bus.interNodeDistance,
+					bus.channelPropagationSpeed,
 					persistent,
 					outputToFile
 				);

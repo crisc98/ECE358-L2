@@ -7,9 +7,9 @@
 #include "PacketQueueAbstraction.hpp"
 #include "DiscreteEvent.hpp"
 
-class PacketQueueSimulator;
+class DiscreteEventSimulator;
 
-typedef DiscreteEvent<Seconds, PacketQueueSimulator> PacketQueueEvent;
+typedef DiscreteEvent<Seconds, DiscreteEventSimulator> PacketQueueEvent;
 
 /**
  * Processes a set of discrete packet queue events that act on the
@@ -21,7 +21,7 @@ typedef DiscreteEvent<Seconds, PacketQueueSimulator> PacketQueueEvent;
  * "packet queue events" it will be running, whereby it delegates these details
  * to the subclasses themselves per the "strategy pattern".
  */
-class PacketQueueSimulator
+class DiscreteEventSimulator
 {
 private:
 
@@ -56,7 +56,7 @@ public:
 	 * All events registered via addEvent() are assumed to "act upon" the state of
 	 * this abstraction in some way.
 	 */
-	PacketQueueSimulator(PacketQueueAbstraction *packetQueue) : simulationDuration(0), packetQueue(packetQueue)
+	DiscreteEventSimulator(PacketQueueAbstraction *packetQueue) : simulationDuration(0), packetQueue(packetQueue)
 	{
 	}
 
@@ -96,7 +96,7 @@ public:
 	/**
 	 * Ensures that all registered event objects have been destroyed once this class is destroyed.
 	 */
-	~PacketQueueSimulator()
+	~DiscreteEventSimulator()
 	{
 		flush();
 	}

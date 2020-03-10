@@ -2,20 +2,20 @@
 
 #include <iostream>
 
-#include "CSMACDSimulator.hpp"
+#include "NetworkSimulatorConfigurer.hpp"
 
 typedef double TrafficIntensity;
 typedef double Factor;
 
 /**
- * Generates statistics about a particular CSMA/CD network configuration
- * and stores them into a CSV file.
+ * Generates statistics about a particular network configuration with respect to
+ * the number of nodes in that network and stores them into a CSV file.
  */
-class CSMACDAnalyzer
+class NetworkAnalyzer
 {
 private:
 
-	CSMACDSimulator *simulator;
+	NetworkSimulatorConfigurer *configurer;
 
 public:
 
@@ -29,7 +29,7 @@ public:
 	 * and monitoring events matching the parameters given to each invocation of one
 	 * of the gatherDataFor() methods.
 	 */
-	CSMACDAnalyzer(CSMACDSimulator *simulator) : simulator(simulator)
+	NetworkAnalyzer(NetworkSimulatorConfigurer *configurer) : configurer(configurer)
 	{
 	}
 
