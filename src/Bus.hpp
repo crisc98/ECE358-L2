@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Node.hpp"
+#include "Network.hpp"
 
 typedef double Meters;
 typedef double MetersPerSecond;
@@ -9,14 +9,9 @@ typedef long BitsPerSecond;
 typedef long FramesPerSecond;
 typedef long Nodes;
 
-class Bus
+class Bus : Network
 {
 public:
-
-	/**
-	 * The total number of nodes connected to the bus-topology network.
-	 */
-	Nodes nodeCount;
 
 	/**
 	 * The average number of frames per second to be generated at each node.
@@ -33,6 +28,8 @@ public:
 	 */
 	Bits frameLength;
 
+	//
+
 	/**
 	 * The distance between adjacent nodes in meters.
 	 */
@@ -42,4 +39,10 @@ public:
 	 * The speed at which information can propagate through the channel in meters per second.
 	 */
 	MetersPerSecond channelPropagationSpeed;
+
+	/**
+	 * Calculates the shortest propagation delay between two nodes in a bus configuration.
+	 * The inputs must be non-null.
+	 */
+	Seconds getShortestPropagationDelayBetween(Node *node1, Node *node2);
 };

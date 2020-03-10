@@ -30,7 +30,7 @@ void showUsage()
 		<< "a <average frame arrival rate in frames per second (long)>\n"
 		<< "r <channel transmission rate in bits per second (long)>\n"
 		<< "l <frame length in bits for all frames (long)>\n"
-		<< "d <distance between adjacent nodes on the bus (double)>\n"
+		<< "d <distance between adjacent nodes on the bus in meters (double)>\n"
 		<< "p <channel signal propagation speed in meters per second (double)>\n"
 		<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>\n"
 		<< "s - show the current settings\n"
@@ -143,7 +143,7 @@ bool validateSettings(
 	}
 	if (averageFrameArrivalRate <= 0)
 	{
-		std::cout << "a <average frame arrival rate in frames per second(long)> has not yet been successfully entered.\n\n";
+		std::cout << "a <average frame arrival rate in frames per second (long)> has not yet been successfully entered.\n\n";
 		dataMissing = true;
 	}
 	if (channelTransmissionRate <= 0)
@@ -158,12 +158,12 @@ bool validateSettings(
 	}
 	if (interNodeDistance <= 0)
 	{
-		std::cout << "d <distance between adjacent nodes on the bus(double)> has not yet been successfully entered.\n\n";
+		std::cout << "d <distance between adjacent nodes on the bus in meters (double)> has not yet been successfully entered.\n\n";
 		dataMissing = true;
 	}
 	if (channelPropagationSpeed <= 0)
 	{
-		std::cout << "p <channel signal propagation speed in meters per second(double)> has not yet been successfully entered.\n\n";
+		std::cout << "p <channel signal propagation speed in meters per second (double)> has not yet been successfully entered.\n\n";
 		dataMissing = true;
 	}
 
@@ -178,7 +178,7 @@ bool validateSettings(
  */
 void runAnalysis(
 	CSMACDAnalyzer *analyzer,
-	Seconds simulationTime,
+	Seconds simulationDuration,
 	Nodes nodesSingle,
 	Nodes nodesLower,
 	Nodes nodesUpper,
@@ -193,7 +193,7 @@ void runAnalysis(
 )
 {
 	if (validateSettings(
-		simulationTime,
+		simulationDuration,
 		nodesSingle,
 		nodesLower,
 		nodesUpper,
@@ -227,7 +227,7 @@ void runAnalysis(
 		// write the current settings to the output as a CSV row with header
 		*output
 			<< "t,ni,nl,nu,ns,a,r,l,d,m\n"
-			<< simulationTime << ","
+			<< simulationDuration << ","
 			<< nodesSingle << ","
 			<< nodesLower << ","
 			<< nodesUpper << ","
@@ -244,20 +244,16 @@ void runAnalysis(
 		if (nodesSingle > 0)
 		{
 			analyzer->gatherDataFor(
-				averagePacketLength,
-				sampleRateFactor,
-				rhoSingle,
+				nodesSingle,
 				output
 			);
 		}
 		else
 		{
 			analyzer->gatherDataFor(
-				averagePacketLength,
-				sampleRateFactor,
-				rhoLower,
-				rhoUpper,
-				rhoStep,
+				nodesLower,
+				nodesUpper,
+				nodesStep,
 				output
 			);
 		}
@@ -313,9 +309,9 @@ int main(int argc, char *argv[])
 		switch (input)
 		{
 		case 't': // set the simulation duration
-			getDouble(&simulator.simulationDuration, true, "Invalid simulation duration (d); please enter a valid positive nonzero decimal value (double) in seconds.\n\n");
+			getDouble(&simulator.simulationDuration, REQUIRE_POSITIVE, "Invalid simulation duration (d); please enter a valid positive nonzero decimal value (double) in seconds.\n\n");
 			break;
-		case 'r': // set the number of nodes (N) to simulate
+		case 'n': // set the number of nodes (N) to simulate
 			std::cin >> input;
 			switch (input)
 			{
@@ -357,18 +353,29 @@ int main(int argc, char *argv[])
 				std::cout << "Invalid command; enter \'h\' to show the list of commands.\n\n" << std::flush;
 			}
 			break;
+		case 'a': // set the average frame arrival rate
+			getLong(&bus.averageFrameArrivalRate, REQUIRE_POSITIVE, "Invalid average frame arrival rate (a); please enter a valid positive nonzero integer (long) in frames per second.\n\n");
+			break;
+		case 'r': // set the channel transmission rate
+			getLong(&bus.channelTransmissionRate, REQUIRE_POSITIVE, "Invalid channel transmission rate (r); please enter a valid positive nonzero integer (long) in bits per second.\n\n");
+			break;
 		case 'l': // set the frame length for all frames
-			getLong(&averagePacketLength, true, "Invalid average packet length (l); please enter a valid positive nonzero integer (long) in bits.\n\n");
+			getLong(&bus.frameLength, REQUIRE_POSITIVE, "Invalid frame length (l); please enter a valid positive nonzero integer (long) in bits.\n\n");
 			break;
-		case 'f': // set the sample rate factor
-			getDouble(&sampleRateFactor, true, "Invalid sample rate factor (f); please enter a valid positive nonzero decimal value (double) to be multiplied with lambda.\n\n");
+		case 'd': // set the inter-node distance
+			getDouble(&bus.interNodeDistance, REQUIRE_POSITIVE, "Invalid inter-node distance (d); please enter a valid positive nonzero decimal value (double) in meters.\n\n");
 			break;
-		case 'c': // set the packet queue server's transmission rate
-			getLong(&packetQueue.transmissionRate, true, "Invalid transmission rate (c); please enter a valid positive nonzero integer (long) in bits per second.\n\n");
+		case 'p': // set the channel signal propagation speed
+			getDouble(&bus.channelPropagationSpeed, REQUIRE_POSITIVE, "Invalid channel signal propagation speed (p); please enter a valid positive nonzero decimal value (double) in meters per second.\n\n");
 			break;
-		case 'k': // set the max buffer size
-			getLong(&packetQueue.maxBufferSize, false, "Invalid max buffer size (k); please enter a valid nonzero integer (long) in packets.\n\n");
-			break;
+		case 'm': // set the persistence mode (persistent versus non-persistent)
+		{
+			long persistenceModeSelect = 0;
+			if (getLong(&persistenceModeSelect, ALLOW_NEGATIVE, "Invalid frame length (l); please enter a valid positive nonzero integer (long) in bits.\n\n"))
+			{
+				persistent = persistenceModeSelect == 0;
+			}
+		}
 		case 's': // show the settings
 			std::cout
 				<< "Settings:\n\n"
@@ -379,49 +386,51 @@ int main(int argc, char *argv[])
 				<< "a <average frame arrival rate in frames per second (long)>: " << averageFrameArrivalRate << "\n"
 				<< "r <channel transmission rate in bits per second (long)>: " << channelTransmissionRate << "\n"
 				<< "l <frame length in bits for all frames (long)>: " << frameLength << "\n"
-				<< "d <distance between adjacent nodes on the bus (double)>: " << interNodeDistance << "\n"
+				<< "d <distance between adjacent nodes on the bus in meters (double)>: " << interNodeDistance << "\n"
 				<< "p <channel signal propagation speed in meters per second (double)>: " << channelPropagationSpeed << "\n"
 				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n"
 				<< std::flush;
 			break;
 		case 'o': // run the simulation and output the results
+		{
+			bool successfullyParsed = true;
+			bool outputToFile;
+
 			std::cin >> input;
 			switch (input)
 			{
 			case 'c': // output the CSV results to the console
-				runAnalysis(
-					&analyzer,
-					simulator.simulationDuration,
-					averagePacketLength,
-					sampleRateFactor,
-					packetQueue.transmissionRate,
-					packetQueue.maxBufferSize,
-					rhoSingle,
-					rhoLower,
-					rhoUpper,
-					rhoStep,
-					false
-				);
+				outputToFile = false;
 				break;
 			case 'f': // output the CSV results to a file
-				runAnalysis(
-					&analyzer,
-					simulator.simulationDuration,
-					averagePacketLength,
-					sampleRateFactor,
-					packetQueue.transmissionRate,
-					packetQueue.maxBufferSize,
-					rhoSingle,
-					rhoLower,
-					rhoUpper,
-					rhoStep,
-					true
-				);
+				outputToFile = true;
 				break;
 			default:
 				std::cout << "Invalid command; enter \'h\' to show the list of commands.\n\n" << std::flush;
+				successfullyParsed = false;
 			}
+
+			if (successfullyParsed)
+			{
+				runAnalysis(
+					&analyzer,
+					simulator.simulationDuration,
+					nodesSingle,
+					nodesLower,
+					nodesUpper,
+					nodesStep,
+					averageFrameArrivalRate,
+					channelTransmissionRate,
+					frameLength,
+					interNodeDistance,
+					channelPropagationSpeed,
+					persistent,
+					outputToFile
+				);
+			}
+
 			break;
+		}
 		case 'q': // end the program; let the destructors do their thing
 			return 0;
 		case 'h': // show the list of commands

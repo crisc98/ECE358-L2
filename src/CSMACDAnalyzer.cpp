@@ -1,13 +1,13 @@
 #include <random>
 
 #include "PacketArrivalEvent.hpp"
-#include "PacketQueueAnalyzer.hpp"
+#include "CSMACDAnalyzer.hpp"
 #include "PacketQueueObservationEvent.hpp"
 
 /**
  * Adds the CSV headers to the start of the output.
  */
-void PacketQueueAnalyzer::writeHeaders(std::ostream *output)
+void CSMACDAnalyzer::writeHeaders(std::ostream *output)
 {
 	*output << "rho,numArrivals,numDepartures,numDropped,numIdles,numObservations,E[N],P_IDLE,P_LOSS\n" << std::flush;
 }
@@ -24,7 +24,7 @@ void PacketQueueAnalyzer::writeHeaders(std::ostream *output)
  * running, the generated packet queue performance statistics are written to
  * a CSV row.
  */
-void PacketQueueAnalyzer::gatherDataFor(
+void CSMACDAnalyzer::gatherDataFor(
 	Bits averagePacketLength,
 	Factor sampleRateFactor,
 	TrafficIntensity rho,
@@ -145,7 +145,7 @@ void PacketQueueAnalyzer::gatherDataFor(
  * Swaps rhoLower with rhoUpper if rhoLower is greater than rhoUpper.
  * Immediately aborts if rhoStep is 0.
  */
-void PacketQueueAnalyzer::gatherDataFor(
+void CSMACDAnalyzer::gatherDataFor(
 	Bits averagePacketLength,
 	Factor sampleRateFactor,
 	TrafficIntensity rhoLower,
