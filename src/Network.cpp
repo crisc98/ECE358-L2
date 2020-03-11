@@ -44,4 +44,5 @@ BitsPerSecond Network::getThroughput(Seconds simulationDuration)
 void Network::reset()
 {
 	for (Node *node : nodes) delete node;
+	nodes.clear();
 }

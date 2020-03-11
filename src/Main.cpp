@@ -5,6 +5,8 @@
 #include <random>
 #include <string>
 
+#include "CSMACDChannelSenseEventFactory.hpp"
+#include "CSMACDNodeFactory.hpp"
 #include "NetworkAnalyzer.hpp"
 #include "UniformBusSimulatorConfigurer.hpp"
 
@@ -281,10 +283,19 @@ int main(int argc, char *argv[])
 	UniformBus bus;
 
 	// runs events against the bus network's state; the simulation duration may be updated throughout the session
-	NetworkSimulator simulator(&bus); 
+	NetworkSimulator simulator(&bus);
+
+	// set the network experiment configurer to use the CSMA/CD MAC protocol
+	CSMACDNodeFactory nodeFactory;
+	CSMACDChannelSenseEventFactory channelSenseEventfactory;
 
 	// configures network experiments for different numbers of nodes
-	UniformBusSimulatorConfigurer configurer(&bus, &simulator);
+	UniformBusSimulatorConfigurer configurer(
+		&bus,
+		&simulator,
+		&nodeFactory,
+		&channelSenseEventfactory
+	);
 
 	// uses the experiment configurer to generate statistical data with respect changing numbers of nodes
 	NetworkAnalyzer analyzer(&configurer);
@@ -294,8 +305,6 @@ int main(int argc, char *argv[])
 	Nodes nodesLower = 0;
 	Nodes nodesUpper = 0;
 	Nodes nodesStep = 0;
-	BitsPerSecond channelTransmissionRate = 0;
-	Bits frameLength = 0;
 	bool persistent = true;
 
 	bool succeeded = false;
@@ -374,6 +383,10 @@ int main(int argc, char *argv[])
 			if (getLong(&persistenceModeSelect, ALLOW_NEGATIVE, "Invalid frame length (l); please enter a valid positive nonzero integer (long) in bits.\n\n"))
 			{
 				persistent = persistenceModeSelect == 0;
+
+				// update the node and channel sense event factories to use persistent or non-persistent CSMA/CD
+				nodeFactory.persistent = persistent;
+				channelSenseEventfactory.persistent = persistent;
 			}
 		}
 		case 's': // show the settings
@@ -426,8 +439,8 @@ int main(int argc, char *argv[])
 					nodesUpper,
 					nodesStep,
 					bus.averageFrameArrivalRate,
-					channelTransmissionRate,
-					frameLength,
+					bus.channelTransmissionRate,
+					bus.frameLength,
 					bus.interNodeDistance,
 					bus.channelPropagationSpeed,
 					persistent,

@@ -21,7 +21,7 @@ public:
 	}
 
 	/**
-	 * The processes the discrete event, allowing it to act upon the specific state.
+	 * Processes the discrete event, allowing it to act upon the specific state.
 	 */
 	virtual void process(TState *state) = 0;
 

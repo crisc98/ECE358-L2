@@ -1,7 +1,9 @@
 #pragma once
 
-#include "UniformBus.hpp"
+#include "ChannelSenseEventFactory.hpp"
 #include "NetworkSimulatorConfigurer.hpp"
+#include "NodeFactory.hpp"
+#include "UniformBus.hpp"
 
 /**
  * Used to configure simulations of a "uniform bus" for various numbers of nodes.
@@ -21,14 +23,30 @@ private:
 	 */
 	NetworkSimulator *simulator;
 
+	/**
+	 * Delegates to the derived type the decision of which implementation of the
+	 * Node class to use.
+	 */
+	NodeFactory *nodeFactory;
+
+	/**
+	 * Delegates to the derived type the decision of which implementation of the
+	 * ChannelSenseEvent class to use.
+	 */
+	ChannelSenseEventFactory *channelSenseEventfactory;
+	
 public:
 
 	UniformBusSimulatorConfigurer(
 		UniformBus *bus,
-		NetworkSimulator *simulator
+		NetworkSimulator *simulator,
+		NodeFactory *nodeFactory,
+		ChannelSenseEventFactory *channelSenseEventfactory
 	) :
 		bus(bus),
-		simulator(simulator)
+		simulator(simulator),
+		nodeFactory(nodeFactory),
+		channelSenseEventfactory(channelSenseEventfactory)
 	{
 	}
 

@@ -3,10 +3,6 @@
 #include "DiscreteEventSimulator.hpp"
 #include "Network.hpp"
 
-class NetworkSimulator;
-
-typedef DiscreteEvent<Seconds, NetworkSimulator> NetworkEvent;
-
 /**
  * ~Simulates the CSMA/CD MAC protocol for negotiating the transmission of frames
  * from the nodes in a network onto a single, shared channel. The exact topology

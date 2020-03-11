@@ -1,7 +1,6 @@
-#include <random>
-
 #include "UniformBusSimulatorConfigurer.hpp"
-#include ""
+
+#include <random>
 
 /**
  * Returns a pointer to a simulation of a uniform bus with the specified number
@@ -29,7 +28,10 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 
 	for (int i = 0; i < nodes; ++i)
 	{
-		Node *node = new Node(i);
+		Node *node = nodeFactory->createNode(i);
+
+		// give the network data structure the responsibility of destroying the node
+		simulator->network->nodes.push_back(node);
 
 		/**
 		 * Populate the node with frames whose inter-arrival times follow an
@@ -52,6 +54,21 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 			}
 		}
 
-		
+		// create events for the first attempts by each node to sense the channel
+		Seconds projectedTimeOfTransmission = node->getProjectedTimeOfTransmissionOnChannelFree();
+		ChannelSenseEvent channelSenseEvent = channelSenseEventfactory->createEvent(projectedTimeOfTransmission, node);
+		simulator->addEvent(channelSenseEvent);
+
+		/**
+		 * Currently, there is no way to really know if a node experiences a collision
+		 * a priori. This implementation requires that an additional type of event, say, a
+		 * CSMACDStopTransmissionEvent, be created, implemented and registered so that
+		 * the discrete event simulator can begin to dispatch CSMACDChannelBusyEndEvents
+		 * to each node at the right time. The problem is that if we do register such an
+		 * even from the start, at the same time that we register the CSMACDChannelSenseEvent,
+		 * then if there is a collision, we need an elegant way to cancel that event, which
+		 * may require changing up the priority queue to allow arbitrary removals and
+		 * reinsertions.
+		 */
 	}
 }

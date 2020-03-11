@@ -31,14 +31,20 @@ public:
 	NodeNumber number;
 
 	/**
-	 * The number of nodes whose channel assertions have reached this node after
-	 * their respective propagation delays.
+	 * The number of nodes (excluding this node) whose channel assertions have
+	 * reached and are passing through this node after their respective propagation
+	 * delays.
 	 *
 	 * This is 0 or greater, whereby a value of 1 or greater indicates that the
-	 * channel is busy at this node.
+	 * channel is busy at this node, while a value of 0 indicates that it is
+	 * currently idle.
 	 */
-	Nodes busyCount;
-
+	Nodes numIncomingSignals;
+	
+	/**
+	 * True if this node is currently
+	 */
+	bool isCurrentlyTransmitting;
 	/**
 	 * The total number of frames to have been generated at this node within the simulation's duration.
 	 */
@@ -63,7 +69,57 @@ public:
 	 * The projected time at which the frame at the front of this node's frame queue will be transmitted.
 	 */
 	Seconds projectedTimeOfTransmission;
+
+	/**
+	 * Initializes the node's number and initializes all other fields to zero.
+	 */
+	Node(NodeNumber number) :
+		number(number),
+		numIncomingSignals(0),
+		totalFrames(0),
+		totalTransmissionAttempts(0),
+		totalTransmittedFrames(0),
+		totalTransmittedBits(0),
+		projectedTimeOfTransmission(0)
+	{
+	}
+
+	/**
+	 * Updates the time at which the frame at the front of this node's frame queue
+	 * will be transmitted based on whether the last time of transmission would have
+	 * caused a collision.
+	 * 
+	 * If no collision was detected, the frame is transmitted and the transmitted frames
+	 * counter is incremented, whereby the underlying MAC protocol implementation will
+	 * decide the time to attempt transmitting the next frame.
+	 * 
+	 * If a collision is detected, the underlying MAC protocol implementation will decide
+	 * the next time to attempt transmitting the current frame or whether the frame
+	 * should be dropped.
+	 */
+	virtual void updateProjectedTimeOfTransmission(
+		bool collisionDetected,
+		Seconds channelBusyStart,
+		Seconds channelBusyEnd);
 	
+	/**
+	 * Get the expected time at which the frame at the front of this node's frame queue
+	 * will next sense the channel if the channel is currently free.
+	 */
+	virtual Seconds getProjectedTimeOfTransmissionOnChannelFree() = 0;
+
+	/**
+	 * Get the expected time at which the frame at the front of this node's frame queue
+	 * will next sense the channel if the channel is currently busy.
+	 */
+	virtual Seconds getProjectedTimeOfTransmissionOnChannelBusy(BitsPerSecond channelTransmissionRate) = 0;
+
+	/**
+	 * Get the expected time at which the frame at the front of this node's frame queue
+	 * will next sense the channel if a collision was detected.
+	 */
+	virtual Seconds getProjectedTimeOfTransmissionOnCollision(BitsPerSecond channelTransmissionRate) = 0;
+
 	/**
 	 * Adds a frame to this node's frame queue. It is assumed that frames will be
 	 * added in order such that the frame with the smallest timestamp is always
@@ -94,42 +150,14 @@ public:
 	Frame peekFrame();
 
 	/**
+	 * Returns true if the node has detected that the channel is busy.
+	 */
+	bool channelIsBusy();
+
+	/**
 	 * Removes all frames from this node and resets all of the statistical counters.
 	 */
 	void flush();
-
-	/**
-	 * Initializes the node's number and initializes all other fields to zero.
-	 */
-	Node(NodeNumber number) :
-		number(number),
-		busyCount(0),
-		totalFrames(0),
-		totalTransmissionAttempts(0),
-		totalTransmittedFrames(0),
-		totalTransmittedBits(0),
-		projectedTimeOfTransmission(0)
-	{
-
-	}
-
-	/**
-	 * Updates the time at which the frame at the front of this node's frame queue
-	 * will be transmitted based on whether the last time of transmission would have
-	 * caused a collision.
-	 * 
-	 * If no collision was detected, the frame is transmitted and the transmitted frames
-	 * counter is incremented, whereby the underlying MAC protocol implementation will
-	 * decide the time to attempt transmitting the next frame.
-	 * 
-	 * If a collision is detected, the underlying MAC protocol implementation will decide
-	 * the next time to attempt transmitting the current frame or whether the frame
-	 * should be dropped.
-	 */
-	virtual void updateProjectedTimeOfTransmission(
-		bool collisionDetected,
-		Seconds channelBusyStart,
-		Seconds channelBusyEnd);
 
 	/**
 	 * Compares pointers to nodes based on the time at which they are next

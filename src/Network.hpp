@@ -4,8 +4,8 @@
 
 #include "Node.hpp"
 
-typedef double Seconds;
 typedef double Percentage;
+typedef double Seconds;
 
 /**
  * Represents a graph of nodes arranged in a particular network topology
@@ -20,12 +20,12 @@ class Network
 {
 public:
 
-	std::vector<Node*> nodes;
-
 	/**
-	 * Add the specified number of nodes to the network.
+	 * The set of nodes in this network.
+	 * To be populated externally.
+	 * Cleared via the reset() method which likewise destroys all the nodes.
 	 */
-	virtual void addNodes(Nodes nodes, Seconds ) = 0;
+	std::vector<Node*> nodes;
 
 	/**
 	 * Calculates the time required to fully transmit the frame currently at the front
