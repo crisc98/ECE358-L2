@@ -1,8 +1,12 @@
 #include "UniformBusSimulatorConfigurer.hpp"
 
+#include <algorithm>
 #include <random>
 
 #include "TransmissionAttemptEvent.hpp"
+
+// put here to avoid a circular dependency
+#include "Node.hpp"
 
 /**
  * Returns a pointer to a simulation of a uniform bus with the specified number
@@ -25,12 +29,15 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 	 * lambda happens to be the average frames per second, which we already have,
 	 * so no additional calculation is needed.
 	 */
-	FramesPerSecond lambda = uniform;
-	std::exponential_distribution<FramesPerSecond> interArrivalTime(lambda);
+	typedef double SecondsPerFrame;
+	FramesPerSecond lambda = bus->averageFrameArrivalRate;
+	std::exponential_distribution<SecondsPerFrame> interArrivalTime(lambda);
+
+	Channel channel(bus->channelTransmissionRate, bus->channelPropagationSpeed);
 
 	for (int i = 0; i < nodes; ++i)
 	{
-		Node *node = nodeFactory->createNode(i);
+		Node *node = nodeFactory->createNode(i, &channel);
 
 		// give the network data structure the responsibility of destroying the node
 		simulator->network->nodes.push_back(node);
@@ -61,8 +68,25 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 			// create the event for this node's first attempt to transmit to the channel
 			Frame firstFrame = node->peekFrame();
 			Seconds transmissionAttemptTime = firstFrame.arrivalTime;
-			TransmissionAttemptEvent transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, node);
+			TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, node);
 			simulator->addEvent(transmissionAttemptEvent);
 		}
 	}
+
+	// configure the network topology as a bus by creating the appropriate network edges
+	for (Node *node : bus->nodes)
+	{
+		for (Node *targetNode : bus->nodes)
+		{
+			if (node != targetNode)
+			{
+				Nodes nodalDistance = std::abs(node->number - targetNode->number);
+				Meters connectionLength = bus->interNodeDistance * ((double)nodalDistance);
+				ChannelConnection *connection = new ChannelConnection(targetNode, connectionLength, bus->channelPropagationSpeed);
+				node->connections.push_back(connection);
+			}
+		}
+	}
+
+	return simulator;
 }

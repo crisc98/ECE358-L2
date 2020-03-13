@@ -4,7 +4,7 @@
  * Returns true if the specified time is between 0 seconds and the current simulation duration.
  */
 template <class TTime, class TState>
-bool DiscreteEventSimulator<TTime, TState>::isWithinSimulationDuration(Seconds time)
+bool DiscreteEventSimulator<TTime, TState>::isWithinSimulationDuration(TTime time)
 {
 	bool result = (time >= 0) && (time <= simulationDuration);
 	return result;
@@ -48,7 +48,8 @@ void DiscreteEventSimulator<TTime, TState>::runSimulation()
 	{
 		DiscreteEvent<TTime, TState> *event = eventQueue.top();
 		eventQueue.pop();
-		event->process(this);
+		TState *state = getState();
+		event->process(state);
 		delete event;
 	}
 }

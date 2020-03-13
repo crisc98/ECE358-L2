@@ -13,5 +13,5 @@ public:
 	/**
 	 * Returns an instance of the Node abstract class.
 	 */
-	virtual Node* createNode(NodeNumber number) = 0;
+	virtual Node* createNode(NodeNumber number, Channel *channel) = 0;
 };

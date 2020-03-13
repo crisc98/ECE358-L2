@@ -4,8 +4,8 @@
 
 #include "NetworkSimulatorConfigurer.hpp"
 
-typedef double TrafficIntensity;
-typedef double Factor;
+// put here to avoid a circular dependency
+typedef long Nodes;
 
 /**
  * Generates statistics about a particular network configuration with respect to

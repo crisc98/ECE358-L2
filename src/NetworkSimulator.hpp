@@ -15,27 +15,22 @@
  */
 class NetworkSimulator : public DiscreteEventSimulator<Seconds, NetworkSimulator>
 {
+private:
+
+	/**
+	 * Susplies an instance of the simulation state to the supertype.
+	 */
+	NetworkSimulator* getState()
+	{
+		return this;
+	}
+
 public:
 
 	/**
 	 * The network to be simulated.
 	 */
 	Network *network;
-
-	/**
-	 * The total number of attempts across all nodes to transmit a frame.
-	 */
-	Frames totalTransmissionAttempts;
-
-	/**
-	 * The total number of frames to actually be fully and successfully transmitted.
-	 */
-	Frames totalTransmittedFrames;
-
-	/**
-	 * The total number of bits successfully transmitted by the nodes in this network.
-	 */
-	Bits totalTransmittedBits;
 
 	/**
 	 * Creates a simulator for the specified network.

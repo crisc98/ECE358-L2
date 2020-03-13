@@ -52,10 +52,16 @@ public:
 	{
 	public:
 
-		bool operator()(DiscreteEvent* lhs, DiscreteEvent* rhs)
+		bool operator()(DiscreteEvent *lhs, DiscreteEvent *rhs)
 		{
 			bool result = lhs->time > rhs->time;
 			return result;
 		}
 	};
 };
+
+/**
+ * The following is to fix a link error.
+ * See https://www.codeproject.com/Articles/48575/How-to-Define-a-Template-Class-in-a-h-File-and-Imp.
+ */
+#include "DiscreteEvent.cpp"

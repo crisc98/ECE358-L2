@@ -7,18 +7,16 @@
  * this is _after_ the channel has already been senses as being idle.
  */
 void Node::attemptTransmission(
-	Seconds attemptTime,
+	Seconds transmissionStartTime,
 	NetworkSimulator *simulator
 )
 {
-	++simulator->totalTransmissionAttempts;
+	++simulator->network->totalTransmissionAttempts;
 
 	/**
 	 * Notify all other nodes that this node has started transmitting its frame,
 	 * taking into account the propagation delays.
 	 */
-	Seconds processingDelay = 0; // should we want to take this account
-	Seconds transmissionStartTime = attemptTime + processingDelay;
 	startTransmission(transmissionStartTime, simulator);
 
 	/**
@@ -47,7 +45,7 @@ void Node::startTransmission(
 	for (ChannelConnection *connection : connections)
 	{
 		Seconds transmissionStartArrivalTime = transmissionStartTime + connection->channelPropagationDelay;
-		ChannelBusyStartEvent channelBusyStartEvent = new ChannelBusyStartEvent(
+		ChannelBusyStartEvent *channelBusyStartEvent = new ChannelBusyStartEvent(
 			transmissionStartArrivalTime,
 			connection->target);
 		simulator->addEvent(channelBusyStartEvent);
@@ -69,7 +67,7 @@ void Node::stopTransmission(
 	for (ChannelConnection *connection : connections)
 	{
 		Seconds transmissionStopArrivalTime = transmissionStopTime + connection->channelPropagationDelay;
-		ChannelBusyStopEvent channelBusyStopEvent = new ChannelBusyStopEvent(
+		ChannelBusyStopEvent *channelBusyStopEvent = new ChannelBusyStopEvent(
 			transmissionStopArrivalTime,
 			connection->target);
 		simulator->addEvent(channelBusyStopEvent);
@@ -94,9 +92,9 @@ void Node::popFrame(
 		 * we must wait until the transmission stop time before attempting to transmit the
 		 * next frame.
 		 */
-		Frame currentFrame = node->peekFrame();
+		Frame currentFrame = peekFrame();
 		Seconds transmissionAttemptTime = std::max(currentFrame.arrivalTime, transmissionStopTime);
-		TransmissionAttemptEvent transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, node);
+		TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
 		simulator->addEvent(transmissionAttemptEvent);
 	}
 }
@@ -116,7 +114,7 @@ void Node::acceptChannelBusyStartEvent(
 	NetworkSimulator *simulator
 )
 {
-	++node->numIncomingSignals;
+	++numIncomingSignals;
 	acceptChannelBusyStartEventImplementation(eventArrivalTime, simulator);
 }
 
@@ -135,7 +133,7 @@ void Node::acceptChannelBusyStopEvent(
 	NetworkSimulator *simulator
 )
 {
-	--node->numIncomingSignals;
+	--numIncomingSignals;
 	acceptChannelBusyStopEventImplementation(eventArrivalTime, simulator);
 }
 
@@ -152,8 +150,9 @@ void Node::acceptTransmissionAttemptEvent(
 	NetworkSimulator *simulator
 )
 {
-	bool shouldTransmit = shouldTransmit(eventArrivalTime, simulator);
-	if (shouldTransmit) attemptTransmission(eventArrivalTime, simulator);
+	Seconds processingDelay;
+	bool result = shouldTransmit(eventArrivalTime, processingDelay, simulator);
+	if (result) attemptTransmission(eventArrivalTime + processingDelay, simulator);
 }
 
 /**
@@ -181,13 +180,13 @@ void Node::acceptTransmissionStopEvent(
 
 	// update network statistics
 	Frame transmittedFrame = frames.front();
-	simulator->totalTransmittedBits += transmittedFrame.length;
-	++simulator->totalTransmittedFrames;
+	simulator->network->totalTransmittedBits += transmittedFrame.length;
+	++simulator->network->totalTransmittedFrames;
 	
 	// remove the frame from the queue now that it has been fully transmitted
-	popFrame();
+	popFrame(transmissionStopTime, simulator);
 	
-	acceptTransmissionStopEventImplementation(eventArrivalTime, simulator);
+	acceptTransmissionStopEventImplementation(transmissionStopTime, simulator);
 }
 
 /**
@@ -227,4 +226,13 @@ bool Node::channelIsBusy()
 {
 	bool isBusy = numIncomingSignals > 0;
 	return isBusy;
+}
+
+/**
+ * Removes and deletes all channel connections.
+ */
+void Node::reset()
+{
+	for (ChannelConnection *connection : connections) delete connection;
+	connections.clear();
 }

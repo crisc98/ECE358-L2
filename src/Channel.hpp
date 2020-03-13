@@ -24,7 +24,7 @@ public:
 		MetersPerSecond channelPropagationSpeed
 	) :
 		channelTransmissionRate(channelTransmissionRate),
-		channelPropagationSpeed(channelPropagationSpeed),
+		channelPropagationSpeed(channelPropagationSpeed)
 	{
 	}
 

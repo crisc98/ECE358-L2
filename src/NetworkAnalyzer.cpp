@@ -1,6 +1,4 @@
-#include "PacketArrivalEvent.hpp"
 #include "NetworkAnalyzer.hpp"
-#include "PacketQueueObservationEvent.hpp"
 
 /**
  * Adds the CSV headers to the start of the output.
@@ -24,66 +22,24 @@ void NetworkAnalyzer::gatherDataFor(
 	Nodes nodes,
 	std::ostream *output
 )
-	typedef double AveragePacketLength;
-	typedef double AverageObservationsPerSecond;
-
-	// initialize the simulator
-	simulator->flush();
-	simulator->network->reset();
-
-	// initialize random number generation; see https://en.cppreference.com/w/cpp/numeric/random/exponential_distribution
-	std::random_device rd;
-	std::mt19937_64 gen(rd());
-
-	// generate packet arrival events
-
-	// generate packet queue observation events
+{
+	// initialize the simulator for the specified number of nodes
+	NetworkSimulator *simulator = configurer->configureNetworkSimulationFor(nodes);
 
 	/**
-	 * The average seconds per observation (inter-observational time) is equal to 1 / alpha.
-	 */
-	AverageObservationsPerSecond alpha = lambda * sampleRateFactor;
-
-	std::exponential_distribution<FramesPerSecond> interObservationTime(alpha);
-	
-	/**
-	 * Create packet queue observation events for observations whose inter-observation time
-	 * follows an exponential distribution.
-	 */
-	Seconds lastObservationTime = 0;
-	while (true)
-	{
-		Seconds currentInterObservationTime = interObservationTime(gen);
-		Seconds currentObservationTime = lastObservationTime + currentInterObservationTime;
-		lastObservationTime = currentObservationTime;
-		if (simulator->isWithinSimulationDuration(currentObservationTime))
-		{
-			PacketQueueObservationEvent *observation = new PacketQueueObservationEvent(currentObservationTime);
-			simulator->addEvent(observation);
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	/**
-	 * Process all generated events until all packet queue performance statistics
+	 * Process all generated events until all network performance statistics
 	 * for the simulation's duration have been generated.
 	 */
 	simulator->runSimulation();
 
 	// write the results to a CSV row
 	*output
-		<< rho << ","
-		<< simulator->packetQueue->numArrivals << ","
-		<< simulator->packetQueue->numDepartures << ","
-		<< simulator->packetQueue->numDropped << ","
-		<< simulator->packetQueue->numIdles << ","
-		<< simulator->packetQueue->numObservations << ","
-		<< simulator->packetQueue->getAverageBufferSize() << ","
-		<< simulator->packetQueue->getQueueIdleRatio() << ","
-		<< simulator->packetQueue->getPacketLossRatio() << "\n"
+		<< nodes << ","
+		<< simulator->network->totalTransmissionAttempts << ","
+		<< simulator->network->totalTransmittedFrames << ","
+		<< simulator->network->totalTransmittedBits << ","
+		<< simulator->network->getEfficiency() << ","
+		<< simulator->network->getThroughput(simulator->simulationDuration) << "\n"
 		<< std::flush;
 }
 
@@ -103,10 +59,7 @@ void NetworkAnalyzer::gatherDataFor(
 	std::ostream *output
 )
 {
-	if (nodesStep == 0)
-	{
-		return;
-	}
+	if (nodesStep == 0) return;
 
 	if (nodesLower > nodesUpper)
 	{

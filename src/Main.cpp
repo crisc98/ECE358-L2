@@ -5,7 +5,6 @@
 #include <random>
 #include <string>
 
-#include "CSMACDChannelSenseEventFactory.hpp"
 #include "CSMACDNodeFactory.hpp"
 #include "NetworkAnalyzer.hpp"
 #include "UniformBusSimulatorConfigurer.hpp"
@@ -425,12 +424,6 @@ int main(int argc, char *argv[])
 
 			if (successfullyParsed)
 			{
-				// calculate the transmission time for all frames _once_ if possible
-				if ((bus.channelTransmissionRate > 0) && (bus.frameLength > 0))
-				{
-					bus.frameTransmissionTime = ((double)bus.frameLength) / ((double)bus.channelTransmissionRate);
-				}
-
 				runAnalysis(
 					&analyzer,
 					simulator.simulationDuration,

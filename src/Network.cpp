@@ -1,22 +1,15 @@
 #include "Network.hpp"
 
+// put here to avoid a circular dependency
+#include "Node.hpp"
+
 /**
  * Calculates the ratio of the total number of successful transmissions over the
  * total number of transmission attempts across all nodes in the network.
  */
 Percentage Network::getEfficiency()
 {
-	Frames totalTransmittedFrames = 0;
-	Frames totalTransmissionAttempts = 0;
-
-	for (Node *node : nodes)
-	{
-		totalTransmittedFrames += node->totalTransmittedFrames;
-		totalTransmissionAttempts += node->totalTransmissionAttempts;
-	}
-
 	Percentage efficiency = ((double)totalTransmittedFrames) / ((double)totalTransmissionAttempts);
-	
 	return efficiency;
 }
 
@@ -24,17 +17,9 @@ Percentage Network::getEfficiency()
  * Calculates the average number of bits per second throughput perceived throughout
  * the simulation's duration.
  */
-BitsPerSecond Network::getThroughput(Seconds simulationDuration)
+AverageBitsPerSecond Network::getThroughput(Seconds simulationDuration)
 {
-	Bits totalTransmittedBits = 0;
-
-	for (Node *node : nodes)
-	{
-		totalTransmittedBits += node->totalTransmittedBits;
-	}
-
-	BitsPerSecond throughput = totalTransmittedBits / simulationDuration;
-
+	AverageBitsPerSecond throughput = ((double)totalTransmittedBits) / simulationDuration;
 	return throughput;
 }
 

@@ -28,9 +28,17 @@ private:
 	 * some events to add new events to be processed sometime in the future.
 	 */
 	std::priority_queue<
-		DiscreteEvent<TTime, TState>*,
-		std::vector<DiscreteEvent<TTime, TState>*>,
-		DiscreteEvent<TTime, TState>::Comparator> eventQueue;
+		typename DiscreteEvent<TTime, TState>*,
+		std::vector<typename DiscreteEvent<TTime, TState>*>,
+		typename DiscreteEvent<TTime, TState>::Comparator> eventQueue;
+
+protected:
+
+	/**
+	 * Delegates to the subtype the obtainment of the instance of the generic
+	 * state type.
+	 */
+	virtual TState* getState() = 0;
 
 public:
 
@@ -40,7 +48,7 @@ public:
 	 * time will be accepted.
 	 * This may be used to decide if an event should be created at all.
 	 */
-	Seconds simulationDuration;
+	TTime simulationDuration;
 
 	/**
 	 * Creates a discrete simulator with the specified simu
@@ -56,7 +64,7 @@ public:
 	/**
 	 * Returns true if the specified time is between 0 seconds and the current simulation duration.
 	 */
-	bool isWithinSimulationDuration(Seconds time);
+	bool isWithinSimulationDuration(TTime time);
 
 	/**
 	 * Adds an event to be processed at a particular time with respect to other events,
@@ -94,3 +102,9 @@ public:
 		flush();
 	}
 };
+
+/**
+ * The following is to fix a link error.
+ * See https://www.codeproject.com/Articles/48575/How-to-Define-a-Template-Class-in-a-h-File-and-Imp.
+ */
+#include "DiscreteEventSimulator.cpp"

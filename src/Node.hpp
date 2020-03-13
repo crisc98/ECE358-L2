@@ -90,9 +90,13 @@ protected:
 	/**
 	 * Delegates to the specific MAC protocol implementation whether the node should
 	 * attempt to transmit its current frame, and what to do if it can or can't.
+	 * 
+	 * Also delegates to the specific MAC protocol the value of any processing delay
+	 * in determining whether to transmit.
 	 */
 	virtual bool shouldTransmit(
 		Seconds checkTime,
+		Seconds &processingDelay,
 		NetworkSimulator *simulator
 	) = 0;
 
@@ -101,7 +105,7 @@ protected:
 	 * frame has been fully transmitted.
 	 */
 	virtual void acceptTransmissionStopEventImplementation(
-		Seconds eventArrivalTime,
+		Seconds transmissionStopTime,
 		NetworkSimulator *simulator
 	) = 0;
 	
@@ -110,7 +114,7 @@ protected:
 	 * this is _after_ the channel has already been senses as being idle.
 	 */
 	void attemptTransmission(
-		Seconds attemptTime,
+		Seconds transmissionStartTime,
 		NetworkSimulator *simulator
 	);
 
@@ -196,24 +200,6 @@ public:
 		currentTransmissionStopEvent(nullptr)
 	{
 	}
-		
-	/**
-	 * ~Get the expected time at which the frame at the front of this node's frame queue
-	 * will next sense the channel if the channel is currently free.
-	 */
-	virtual Seconds getProjectedTimeOfTransmissionOnChannelFree() = 0;
-
-	/**
-	 * ~Get the expected time at which the frame at the front of this node's frame queue
-	 * will next sense the channel if the channel is currently busy.
-	 */
-	virtual Seconds getProjectedTimeOfTransmissionOnChannelBusy(BitsPerSecond channelTransmissionRate) = 0;
-
-	/**
-	 * ~Get the expected time at which the frame at the front of this node's frame queue
-	 * will next sense the channel if a collision was detected.
-	 */
-	virtual Seconds getProjectedTimeOfTransmissionOnCollision(BitsPerSecond channelTransmissionRate) = 0;
 	
 	/**
 	 * Updates the simulation state in accordance with how a particular MAC protocol
@@ -276,4 +262,17 @@ public:
 	 * Returns true if the node has detected that the channel is busy.
 	 */
 	bool channelIsBusy();
+
+	/**
+	 * Removes and deletes all channel connections.
+	 */
+	void reset();
+
+	/**
+	 * Ensures that all registered channel connections are destroyed once this class is destroyed.
+	 */
+	~Node()
+	{
+		reset();
+	}
 };

@@ -43,7 +43,7 @@ public:
 
 	/**
 	 * Returns a pointer to a simulation of a uniform bus with the specified number
-	 * of nodes.
+	 * of nodes. The point is _not_ to be deleted by the user of this interface.
 	 */
 	NetworkSimulator* configureNetworkSimulationFor(Nodes nodes);
 };

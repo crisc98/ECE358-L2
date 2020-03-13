@@ -2,10 +2,14 @@
 
 #include <vector>
 
-#include "Node.hpp"
+// forward declaration to avoid a circular dependency
+class Node;
 
+typedef double AverageBitsPerSecond;
 typedef double Percentage;
 typedef double Seconds;
+typedef long Bits;
+typedef long Frames;
 
 /**
  * Represents a graph of nodes arranged in a particular network topology.
@@ -27,39 +31,39 @@ public:
 	std::vector<Node*> nodes;
 
 	/**
-	 * ~Calculates the time required to fully transmit the frame currently at the front
-	 * of the specified node's frame queue.
+	 * The total number of attempts across all nodes to transmit a frame.
 	 */
-	virtual Seconds getTransmissionDelayOf(Node *node) = 0;
+	Frames totalTransmissionAttempts;
 
 	/**
-	 * ~Calculates the shortest propagation delay between any two nodes in the network
-	 * based on the particular network topology implementation.
-	 * E.g. A bus implementation with certain assumptions could perform optimizations
-	 * on this calculation.
-	 * The inputs must be non-null.
+	 * The total number of frames to actually be fully and successfully transmitted.
 	 */
-	virtual Seconds getShortestPropagationDelayBetween(Node *node1, Node *node2) = 0;
+	Frames totalTransmittedFrames;
 
 	/**
-	 * ~Calculates the ratio of the total number of successful transmissions over the
+	 * The total number of bits successfully transmitted by the nodes in this network.
+	 */
+	Bits totalTransmittedBits;
+
+	/**
+	 * Calculates the ratio of the total number of successful transmissions over the
 	 * total number of transmission attempts across all nodes in the network.
 	 */
 	Percentage getEfficiency();
 
 	/**
-	 * ~Calculates the average number of bits per second throughput perceived throughout
+	 * Calculates the average number of bits per second throughput perceived throughout
 	 * the simulation's duration.
 	 */
-	BitsPerSecond getThroughput(Seconds simulationDuration);
-	
+	AverageBitsPerSecond getThroughput(Seconds simulationDuration);
+
 	/**
 	 * Removes all nodes from the network.
 	 */
 	void reset();
 
 	/**
-	 * Ensures that all registered nodes in the network have been destroyed once this class is destroyed.
+	 * Ensures that all registered nodes in the network are destroyed once this class is destroyed.
 	 */
 	~Network()
 	{

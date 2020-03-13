@@ -5,8 +5,8 @@
 /**
  * Creates a Node instance that implements the CSMA/CD MAC protocol.
  */
-Node* CSMACDNodeFactory::createNode(NodeNumber number)
+Node* CSMACDNodeFactory::createNode(NodeNumber number, Channel *channel)
 {
-	Node *node = new CSMACDNode(number, persistent);
+	Node *node = new CSMACDNode(number, channel, persistent);
 	return node;
 }

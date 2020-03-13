@@ -33,13 +33,6 @@ public:
 	Bits frameLength;
 
 	/**
-	 * The total amount of time required to transmit a frame from any node on this bus.
-	 * This is constant and hence the only piece of information needed since the channel
-	 * transmission rate and frame length is assumed to be constant throughout the network.
-	 */
-	Seconds frameTransmissionTime;
-
-	/**
 	 * The distance between adjacent nodes in meters.
 	 */
 	Meters interNodeDistance;
@@ -54,21 +47,8 @@ public:
 	 */
 	UniformBus() :
 		averageFrameArrivalRate(0),
-		frameTransmissionTime(0),
 		interNodeDistance(0),
 		channelPropagationSpeed(0)
 	{
 	}
-
-	/**
-	 * Calculates the time required to fully transmit the frame currently at the front
-	 * of the specified node's frame queue.
-	 */
-	Seconds getTransmissionDelayOf(Node *node);
-
-	/**
-	 * Calculates the shortest propagation delay between two nodes in a bus configuration.
-	 * The inputs must be non-null.
-	 */
-	Seconds getShortestPropagationDelayBetween(Node *node1, Node *node2);
 };

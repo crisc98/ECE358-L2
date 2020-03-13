@@ -27,7 +27,7 @@ public:
 		maxCollisions(10),
 		collisions(0),
 		baseWaitTime(512),
-		power(2)
+		power(2),
 		gen(rd())
 	{
 	}

@@ -1,6 +1,35 @@
 #include "CSMACDNode.hpp"
 
 /**
+ * Performs an exponential backoff using the specific state instance and registers
+ * a new transmission attempt event to be processed after the backoff has finished.
+ */
+void CSMACDNode::performExponentialBackoff(
+	Seconds backoffStart,
+	ExponentialBackoff *backoffState,
+	NetworkSimulator *simulator
+)
+{
+	Bits waitTime = backoffState->getNextWaitTime();
+	if (waitTime < 0)
+	{
+		// the maximum number of collisions has been succeeded such that we must drop the frame
+		popFrame(backoffStart, simulator);
+	}
+	else
+	{
+		/**
+		 * Register an event for the node to attempt to transmit the current frame again after
+		 * the current backoff time.
+		 */
+		Seconds backoffDelay = ((double)waitTime) / channel->channelTransmissionRate;
+		Seconds transmissionAttemptTime = backoffStart + backoffDelay;
+		TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
+		simulator->addEvent(transmissionAttemptEvent);
+	}
+}
+
+/**
  * The CSMA/CD MAC protocol implementation for collision detection.
  */
 void CSMACDNode::acceptChannelBusyStartEventImplementation(
@@ -29,24 +58,7 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
 		currentTransmissionStopEvent->cancelled = true;
 		currentTransmissionStopEvent = nullptr;
 
-		// perform an exponential backoff
-		Bits waitTime = defaultBackoff.getNextWaitTime();
-		if (waitTime < 0)
-		{
-			// the maximum number of collisions has been succeeded such that we must drop the frame
-			popFrame();
-		}
-		else
-		{
-			/**
-			 * Register an event for the node to attempt to transmit the current frame again after
-			 * the current backoff time.
-			 */
-			Seconds backoffDelay = ((double)waitTime) / channel->channelTransmissionRate;
-			Seconds transmissionAttemptTime = transmissionStopTime + backoffDelay;
-			TransmissionAttemptEvent transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
-			simulator->addEvent(transmissionAttemptEvent);
-		}
+		performExponentialBackoff(transmissionStopTime, &defaultBackoff, simulator);
 	}
 }
 
@@ -55,7 +67,7 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
  * channel went idle and responding accordingly.
  */
 void CSMACDNode::acceptChannelBusyStopEventImplementation(
-	Seconds eventArrivalTime,
+	Seconds transmissionStopTime,
 	NetworkSimulator *simulator
 )
 {
@@ -66,17 +78,21 @@ void CSMACDNode::acceptChannelBusyStopEventImplementation(
 	 * attempt to transmit the current frame.
 	 */
 	bool isBackedOff = defaultBackoff.isBackedOff();
-	if (!isBackedOff && persistent && !channelIsBusy()) attemptTransmission(eventArrivalTime, simulator);
+	if (!isBackedOff && persistent && !channelIsBusy()) attemptTransmission(transmissionStopTime, simulator);
 }
 
 /**
  * The CSMA/CD MAC protocol implementation for sensing the carrier.
+ * Assigns a value to the passed processingDelay reference.
  */
 bool CSMACDNode::shouldTransmit(
 	Seconds checkTime,
+	Seconds &processingDelay,
 	NetworkSimulator *simulator
 )
 {
+	processingDelay = 0; // should we want to take this account
+
 	if (channelIsBusy())
 	{
 		if (!persistent)
@@ -85,23 +101,7 @@ bool CSMACDNode::shouldTransmit(
 			 * In the non-persistent case, if the channel is still busy, we must
 			 * perform an exponential backoff.
 			 */
-			Bits waitTime = nonPersistentBackoff.getNextWaitTime();
-			if (waitTime < 0)
-			{
-				// the maximum number of collisions has been succeeded such that we must drop the frame
-				popFrame();
-			}
-			else
-			{
-				/**
-				 * Register an event for the node to attempt to transmit the current frame again after
-				 * the current backoff time.
-				 */
-				Seconds backoffDelay = ((double)waitTime) / channel->channelTransmissionRate;
-				Seconds transmissionAttemptTime = checkTime + backoffDelay;
-				TransmissionAttemptEvent transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
-				simulator->addEvent(transmissionAttemptEvent);
-			}
+			performExponentialBackoff(checkTime + processingDelay, &defaultBackoff, simulator);
 		}
 
 		/**

@@ -27,7 +27,7 @@ Bits ExponentialBackoff::getNextWaitTime()
 /**
  * Returns true if there has at least been one collision.
  */
-bool isBackedOff()
+bool ExponentialBackoff::isBackedOff()
 {
 	bool isBackedOff = collisions > 0;
 	return isBackedOff;

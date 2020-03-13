@@ -20,9 +20,9 @@ add_executable (
 	"CSMACDNode.hpp"
 	"CSMACDNodeFactory.cpp"
 	"CSMACDNodeFactory.hpp"
-	"DiscreteEvent.cpp"
+#	"DiscreteEvent.cpp" Must be excluded: see https://www.codeproject.com/Articles/48575/How-to-Define-a-Template-Class-in-a-h-File-and-Imp.
 	"DiscreteEvent.hpp"
-	"DiscreteEventSimulator.cpp"
+#	"DiscreteEventSimulator.cpp" Must be excluded: see https://www.codeproject.com/Articles/48575/How-to-Define-a-Template-Class-in-a-h-File-and-Imp.
 	"DiscreteEventSimulator.hpp"
 	"ExponentialBackoff.cpp"
 	"ExponentialBackoff.hpp"
@@ -32,7 +32,7 @@ add_executable (
 	"Network.hpp"
 	"NetworkAnalyzer.cpp"
 	"NetworkAnalyzer.hpp"
-	"NetworkSimulator.cpp"
+	"NetworkEvent.hpp"
 	"NetworkSimulator.hpp"
 	"NetworkSimulatorConfigurer.hpp"
 	"Node.cpp"
@@ -45,7 +45,6 @@ add_executable (
 	"TransmissionStopEvent.cpp"
 	"TransmissionStopEvent.hpp"
 	"TransmissionStopEventAcceptor.hpp"
-	"UniformBus.cpp"
 	"UniformBus.hpp"
 	"UniformBusSimulatorConfigurer.cpp"
 	"UniformBusSimulatorConfigurer.hpp"

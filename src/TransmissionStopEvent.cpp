@@ -6,5 +6,5 @@
  */
 void TransmissionStopEvent::processImplementation(NetworkSimulator *simulator)
 {
-	node->acceptTransmissionStopEvent(this, simulator);
+	node->acceptTransmissionStopEvent(time, simulator);
 }

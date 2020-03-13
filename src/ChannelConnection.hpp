@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Node.hpp"
+// forward declaration to avoid a circular dependency
+class Node;
 
 typedef double Meters;
 typedef double MetersPerSecond;
@@ -16,7 +17,7 @@ public:
 	/**
 	 * The pointer to the node that the current node is being connected to on the channel.
 	 */
-	const Node *target;
+	Node *target;
 
 	/**
 	 * The length of the connection in meters.
@@ -46,10 +47,4 @@ public:
 	 * the target node.
 	 */
 	Seconds getSignalArrivalTime(Seconds startTime);
-
-	/**
-	 * ~Calculates the time at which the last bit of a transmission from the current node
-	 * would arrive at the target node.
-	 */
-	Seconds getTransmissionStopArrivalTime(Seconds startTime, Bits bits);
 };
