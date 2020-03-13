@@ -52,18 +52,13 @@ public:
 	/**
 	 * Initializes the bus data structure's fields to 0.
 	 */
-	Bus() :
+	UniformBus() :
 		averageFrameArrivalRate(0),
 		frameTransmissionTime(0),
 		interNodeDistance(0),
 		channelPropagationSpeed(0)
 	{
 	}
-	
-	/**
-	 * Add the specified number of nodes to the bus, 
-	 */
-	void addNodes(Nodes nodes, );
 
 	/**
 	 * Calculates the time required to fully transmit the frame currently at the front

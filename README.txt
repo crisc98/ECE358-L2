@@ -76,3 +76,18 @@ jamming signal delay.
 
 Please judge whether a slightly late but working submission of this sophisticated implementation
 would be acceptable.
+
+2020-03-12:
+
+***Main changes***:
+
+- The "CSMACDChannelBusy_Event" classes were changed to be generic and not specific to CSMA/CD.
+- The "ChannelSenseEvent" class was renamed to "TransmissionAttemptEvent".
+- The proposed "CSMACDTransmissionStopEvent" was changed to a generic "TransmissionStopEvent".
+- Implemented the Visitor Pattern where the "Node" class can now accept the above events, or rather
+  the state they wish for it to process. The event classes now do not perform any state changes of
+  their own, instead delegating it to the specific "Node" class implementation.
+- Deprecated and removed the "ChannelSenseEventFactory" and "CSMACDChannelSenseEventFactory" classes.
+- Changed network topologies to be defined by the addition of various "ChannelConnection" instances
+  to each "Node". Instead of having a dedicated "UniformBus" class, the "UniformBusSimulatorConfigurer"
+  will build a bus network accordingly.

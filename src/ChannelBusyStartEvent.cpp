@@ -1,4 +1,13 @@
-#include "CSMACDChannelBusyStartEvent.hpp"
+#include "ChannelBusyStartEvent.hpp"
+
+/**
+ * Notifies the node this event is targetting that another signal has arrived
+ * and started asserting itself at that node's location on the channel.
+ */
+void ChannelBusyStartEvent::process(NetworkSimulator *simulator)
+{
+	node->acceptChannelBusyStartEvent(this, simulator);
+}
 
 #include "CSMACDChannelBusyEndEvent.hpp"
 #include "CSMACDChannelSenseEvent.hpp"

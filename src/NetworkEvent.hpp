@@ -3,28 +3,7 @@
 #include "NetworkSimulator.hpp"
 
 /**
- * Represents an network event situated at a particular node in that network.
+ * Represents an event that occurs somewhere in a network and performs
+ * an operation on that network's state.
  */
-class NetworkEvent : DiscreteEvent<Seconds, NetworkSimulator>
-{
-public:
-
-	/**
-	 * The node this event is destined for.
-	 */
-	Node *node;
-
-	NetworkEvent(
-		Seconds time,
-		Node *node
-	) :
-		DiscreteEvent(time),
-		node(node)
-	{
-	}
-
-	/**
-	 * Performs some operation and processing around this node.
-	 */
-	virtual void process(NetworkSimulator *simulator) = 0;
-};
+typedef DiscreteEvent<Seconds, NetworkSimulator> NetworkEvent;

@@ -1,7 +1,7 @@
 #include "NetworkSimulator.hpp"
 
 /**
- * Transforms the network's nodes list into a min heap.
+ * ~Transforms the network's nodes list into a min heap.
  */
 void sortNodes()
 {
@@ -9,7 +9,7 @@ void sortNodes()
 }
 
 /**
- * Obtains the pointer to the node at the top of the min heap; this denotes the
+ * ~Obtains the pointer to the node at the top of the min heap; this denotes the
  * current sender node, namely that whose frame at the front of its frame queue
  * has the earliest arrival time or scheduled transmission time out of that of
  * all the other nodes.
@@ -21,7 +21,7 @@ Node* NetworkSimulator::getSenderNode()
 }
 
 /**
- * After the frame at the front of the sender node's frame queue has been successfully
+ * ~After the frame at the front of the sender node's frame queue has been successfully
  * transmitted without collision, or if it has been dropped, it is removed from the
  * queue such that that node's position in the min heap of nodes must be updated.
  * That way, the next sender node to attempt to transmit a frame can be properly

@@ -1,6 +1,13 @@
-#include "CSMACDChannelBusyEndEvent.hpp"
+#include "ChannelBusyStopEvent.hpp"
 
-#include "CSMACDChannelSenseEvent.hpp"
+/**
+ * Notifies the node this event is targetting that a signal has stopped
+ * asserting itself at that node's location on the channel.
+ */
+void ChannelBusyStopEvent::process(NetworkSimulator *simulator)
+{
+	node->acceptChannelBusyStopEvent(this, simulator);
+}
 
 /**
  * Tells the target node that a signal has stopped asserting itself at that node's

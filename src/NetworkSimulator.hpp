@@ -11,17 +11,18 @@
  * 
  * This class uses the CRTP to give its discrete network events access to the
  * the simulation state and allow them to register new events.
+ * See https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern.
  */
 class NetworkSimulator : public DiscreteEventSimulator<Seconds, NetworkSimulator>
 {
 private:
 	/**
-	 * Transforms the network's nodes list into a min heap.
+	 * ~Transforms the network's nodes list into a min heap.
 	 */
 	void sortNodes();
 
 	/**
-	 * Obtains the pointer to the next node to attempt to transmit a frame.
+	 * ~Obtains the pointer to the next node to attempt to transmit a frame.
 	 */
 	Node* getSenderNode();
 
@@ -29,7 +30,7 @@ private:
 	const bool DROPPED = false;
 
 	/**
-	 * Pops the frame at the front of the current sending node's frame queue
+	 * ~Pops the frame at the front of the current sending node's frame queue
 	 * while maintaining the min heap of nodes.
 	 * This is only done after the node's frame has been successfully transmitted
 	 * without collision, or if it has been dropped.
@@ -37,7 +38,7 @@ private:
 	void popSenderFrame(bool transmittedOrDropped);
 
 	/**
-	 * Attempts to transmit the sender node's frame, likewise checking if any collisions
+	 * ~Attempts to transmit the sender node's frame, likewise checking if any collisions
 	 * will happen during that transmission.
 	 * Returns true if there are more frames to be transmitted and the simulation duration
 	 * has not yet been exceeded.

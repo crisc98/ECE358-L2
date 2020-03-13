@@ -1,7 +1,8 @@
 #pragma once
 
 /**
- *
+ * Represents a discrete event occuring at a particular point in time that will
+ * cause a state change on a particular state at the time it gets processed.
  */
 template <class TTime, class TState>
 class DiscreteEvent

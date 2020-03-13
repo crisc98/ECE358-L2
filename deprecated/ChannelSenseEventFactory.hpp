@@ -3,7 +3,7 @@
 #include "ChannelSenseEvent.hpp"
 
 /**
- * Delegates to the derived type the decision of which implementation of the
+ * ~Delegates to the derived type the decision of which implementation of the
  * ChannelSenseEvent class to use.
  */
 class ChannelSenseEventFactory

@@ -1,21 +1,36 @@
 #pragma once
 
 #include <queue>
+#include <vector>
 
+#include "ChannelBusyStartEventAcceptor.hpp"
+#include "ChannelBusyStopEventAcceptor.hpp"
+#include "ChannelConnection.hpp"
 #include "Frame.hpp"
+#include "TransmissionAttemptEventAcceptor.hpp"
+#include "TransmissionStopEventAcceptor.hpp"
 
-typedef long BitsPerSecond;
 typedef long Frames;
 typedef long NodeNumber;
 typedef long Nodes;
 
 /**
- * Represents a node within a network.
+ * Represents a node within a network, namely one connected to one channel
+ * that can only have one signal on it at a time for a transmission to be valid
+ * (signals must not interfere or intersect, else they will be corrupted).
  */
-class Node
+class Node :
+	ChannelBusyStartEventAcceptor,
+	ChannelBusyStopEventAcceptor,
+	TransmissionAttemptEventAcceptor,
+	TransmissionStopEventAcceptor
 {
 private:
 
+	/**
+	 * The set of frames that have been scheduled to arrive at and be transmitted
+	 * by this node at a particular minimum time.
+	 */
 	std::queue<Frame> frames;
 
 	/**
@@ -29,6 +44,11 @@ public:
 	 * A unique identifier for the node; generally 0-indexed.
 	 */
 	NodeNumber number;
+
+	/**
+	 * The set of connections between this node and other nodes in the network graph.
+	 */
+	std::vector<ChannelConnection*> connections;
 
 	/**
 	 * The number of nodes (excluding this node) whose channel assertions have
@@ -103,22 +123,62 @@ public:
 		Seconds channelBusyEnd);
 	
 	/**
-	 * Get the expected time at which the frame at the front of this node's frame queue
+	 * ~Get the expected time at which the frame at the front of this node's frame queue
 	 * will next sense the channel if the channel is currently free.
 	 */
 	virtual Seconds getProjectedTimeOfTransmissionOnChannelFree() = 0;
 
 	/**
-	 * Get the expected time at which the frame at the front of this node's frame queue
+	 * ~Get the expected time at which the frame at the front of this node's frame queue
 	 * will next sense the channel if the channel is currently busy.
 	 */
 	virtual Seconds getProjectedTimeOfTransmissionOnChannelBusy(BitsPerSecond channelTransmissionRate) = 0;
 
 	/**
-	 * Get the expected time at which the frame at the front of this node's frame queue
+	 * ~Get the expected time at which the frame at the front of this node's frame queue
 	 * will next sense the channel if a collision was detected.
 	 */
 	virtual Seconds getProjectedTimeOfTransmissionOnCollision(BitsPerSecond channelTransmissionRate) = 0;
+	
+	/**
+	 * Updates the simulation state in accordance with how a particular MAC protocol
+	 * should respond when an incoming starts asserting itself at the accepting
+	 * node's location on the channel.
+	 */
+	virtual void acceptChannelBusyStartEvent(
+		ChannelBusyStartEvent *event,
+		NetworkSimulator *simulator
+	) = 0;
+
+	/**
+	 * Updates the simulation state in accordance with how a particular MAC protocol
+	 * should respond when an incoming signal stops asserting itself at the accepting
+	 * node's location on the channel.
+	 */
+	virtual void acceptChannelBusyStopEvent(
+		ChannelBusyStopEvent *event,
+		NetworkSimulator *simulator
+	) = 0;
+
+	/**
+	 * Updates the simulation state in accordance with how a particular MAC protocol
+	 * should respond when it reaches the point in time at which it should attempt to
+	 * transmit a frame.
+	 */
+	virtual void acceptTransmissionAttemptEvent(
+		TransmissionAttemptEvent *event,
+		NetworkSimulator *simulator
+	) = 0;
+
+	/**
+	 * Updates the simulation state in accordance with how a particular MAC protocol
+	 * should respond when it reaches the point in time at which it should stop or
+	 * finish transmitting.
+	 */
+	virtual void acceptTransmissionStopEvent(
+		TransmissionStopEvent *event,
+		NetworkSimulator *simulator
+	) = 0;
 
 	/**
 	 * Adds a frame to this node's frame queue. It is assumed that frames will be

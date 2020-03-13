@@ -18,7 +18,7 @@ public:
 		Seconds time,
 		Node *node,
 		bool persistent
-	) : 
+	) :
 		ChannelSenseEvent(time, node),
 		persistent(persistent)
 	{
