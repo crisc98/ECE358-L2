@@ -2,6 +2,8 @@
 
 #include <random>
 
+#include "TransmissionAttemptEvent.hpp"
+
 /**
  * Returns a pointer to a simulation of a uniform bus with the specified number
  * of nodes.
@@ -54,21 +56,13 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 			}
 		}
 
-		// create events for the first attempts by each node to sense the channel
-		Seconds projectedTimeOfTransmission = node->getProjectedTimeOfTransmissionOnChannelFree();
-		ChannelSenseEvent channelSenseEvent = channelSenseEventfactory->createEvent(projectedTimeOfTransmission, node);
-		simulator->addEvent(channelSenseEvent);
-
-		/**
-		 * Currently, there is no way to really know if a node experiences a collision
-		 * a priori. This implementation requires that an additional type of event, say, a
-		 * CSMACDStopTransmissionEvent, be created, implemented and registered so that
-		 * the discrete event simulator can begin to dispatch CSMACDChannelBusyEndEvents
-		 * to each node at the right time. The problem is that if we do register such an
-		 * even from the start, at the same time that we register the CSMACDChannelSenseEvent,
-		 * then if there is a collision, we need an elegant way to cancel that event, which
-		 * may require changing up the priority queue to allow arbitrary removals and
-		 * reinsertions.
-		 */
+		if (node->hasFrames())
+		{
+			// create the event for this node's first attempt to transmit to the channel
+			Frame firstFrame = node->peekFrame();
+			Seconds transmissionAttemptTime = firstFrame.arrivalTime;
+			TransmissionAttemptEvent transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, node);
+			simulator->addEvent(transmissionAttemptEvent);
+		}
 	}
 }

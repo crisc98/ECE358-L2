@@ -4,7 +4,7 @@
 #include "TransmissionStopEventAcceptor.hpp"
 
 /**
- * Represents the event at which a node should stop of finish transmitting
- * the current frame.
+ * Represents the event at which a node has completely finished transmitting
+ * its current frame.
  */
 typedef NodeEvent<TransmissionStopEventAcceptor> TransmissionStopEvent;

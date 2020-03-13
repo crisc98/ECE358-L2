@@ -6,7 +6,7 @@
  * Represents an network event situated at a particular node in that network.
  */
 template <class TNode>
-class NodeEvent : NetworkEvent
+class NodeEvent : public NetworkEvent
 {
 public:
 
@@ -27,5 +27,5 @@ public:
 	/**
 	 * Performs some operation and processing around this node.
 	 */
-	virtual void process(NetworkSimulator *simulator) = 0;
+	void processImplementation(NetworkSimulator *simulator);
 };

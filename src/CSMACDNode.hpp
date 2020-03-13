@@ -18,6 +18,9 @@ private:
 	bool persistent;
 
 	/**
+	/
+
+	/**
 	 * The exponential backoff logic and state shared between the persistent and
 	 * non-persistent CSMA/CD MAC protocol implementations.
 	 */
@@ -27,6 +30,40 @@ private:
 	 * The exponential backoff logic and state used only 
 	 */
 	ExponentialBackoff *nonPersistentBackoff;
+
+	/**
+	 * The CSMA/CD MAC protocol implementation for collision detection.
+	 */
+	void acceptChannelBusyStartEventImplementation(
+		Seconds eventArrivalTime,
+		NetworkSimulator *simulator
+	);
+
+	/**
+	 * The CSMA/CD MAC protocol implementation for checking if the channel whether the
+	 * channel went idle and responding accordingly.
+	 */
+	void acceptChannelBusyStopEventImplementation(
+		Seconds eventArrivalTime,
+		NetworkSimulator *simulator
+	);
+	
+	/**
+	 * The CSMA/CD MAC protocol implementation for sensing the carrier.
+	 */
+	bool shouldTransmit(
+		Seconds checkTime,
+		NetworkSimulator *simulator
+	);
+
+	/**
+	 * Resets the default exponential backoff's collision counter upon a transmission
+	 * success per the CSMA/CD MAC protocol.
+	 */
+	void acceptTransmissionStopEventImplementation(
+		Seconds eventArrivalTime,
+		NetworkSimulator *simulator
+	);
 
 public:
 
@@ -57,7 +94,7 @@ public:
 	 * will next sense the channel if a collision was detected.
 	 */
 	Seconds getProjectedTimeOfTransmissionOnCollision(BitsPerSecond channelTransmissionRate);
-
+	
 	/**
 	 * Destroy the ExponentialBackoff instance for the non-persistent case if needed.
 	 */

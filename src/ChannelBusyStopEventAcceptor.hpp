@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChannelBusyStopEvent.hpp"
+#include "NetworkSimulator.hpp"
 
 /**
  * A class that implements the Visitor Pattern so that it can accept
@@ -16,7 +16,7 @@ public:
 	 * node's location on the channel.
 	 */
 	virtual void acceptChannelBusyStopEvent(
-		ChannelBusyStopEvent *event,
+		Seconds eventArrivalTime,
 		NetworkSimulator *simulator
 	) = 0;
 };

@@ -287,14 +287,12 @@ int main(int argc, char *argv[])
 
 	// set the network experiment configurer to use the CSMA/CD MAC protocol
 	CSMACDNodeFactory nodeFactory;
-	CSMACDChannelSenseEventFactory channelSenseEventfactory;
 
 	// configures network experiments for different numbers of nodes
 	UniformBusSimulatorConfigurer configurer(
 		&bus,
 		&simulator,
-		&nodeFactory,
-		&channelSenseEventfactory
+		&nodeFactory
 	);
 
 	// uses the experiment configurer to generate statistical data with respect changing numbers of nodes
@@ -384,9 +382,11 @@ int main(int argc, char *argv[])
 			{
 				persistent = persistenceModeSelect == 0;
 
-				// update the node and channel sense event factories to use persistent or non-persistent CSMA/CD
+				/**
+				 * Update whether node factory creates nodes that use either the persistent or
+				 * non-persistent implementations of the CSMA/CD MAC protocol.
+				 */
 				nodeFactory.persistent = persistent;
-				channelSenseEventfactory.persistent = persistent;
 			}
 		}
 		case 's': // show the settings

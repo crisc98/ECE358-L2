@@ -1,10 +1,11 @@
 #include "ChannelConnection.hpp"
 
 /**
- * Calculates the time at which the first bit of a transmission from the current node
- * would arrive at the target node.
+ * Calculates the time at which the first bit of a transmission (or _any_ signal, such
+ * as the assertion or deassertion of a signal) from the current node would arrive at
+ * the target node.
  */
-Seconds ChannelConnection::getTransmissionStartArrivalTime(Seconds startTime)
+Seconds ChannelConnection::getSignalArrivalTime(Seconds startTime)
 {
 	Seconds transmissionStartArrivalTime = startTime + channelPropagationDelay;
 	return transmissionStartArrivalTime;
@@ -26,7 +27,7 @@ Seconds ChannelConnection::getTransmissionDelay(Bits bits)
  */
 Seconds ChannelConnection::getTransmissionStopArrivalTime(Seconds startTime, Bits bits)
 {
-	Seconds transmissionStartArrivalTime = getTransmissionStartArrivalTime(startTime);
+	Seconds transmissionStartArrivalTime = getSignalArrivalTime(startTime);
 	Seconds transmissionDelay = getTransmissionDelay(bits);
 	Seconds transmissionStopArrivalTime = transmissionStartArrivalTime + transmissionDelay;
 	return transmissionStopArrivalTime;

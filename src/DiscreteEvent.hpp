@@ -7,6 +7,13 @@
 template <class TTime, class TState>
 class DiscreteEvent
 {
+protected:
+
+	/**
+	 * The implementation of the process() method that will be skipped if cancelled = true.
+	 */
+	virtual void processImplementation(TState *state) = 0;
+
 public:
 
 	/**
@@ -15,17 +22,27 @@ public:
 	TTime time;
 
 	/**
+	 * True if this event has been cancelled, meaning that this event once it is
+	 * about to be processed should not execute the contents of its contents.
+	 * This allows one to save on the performance overhead of completely removing
+	 * the event from the priority queue (provided that is even possible before that
+	 * element has reached the top).
+	 */
+	bool cancelled;
+
+	/**
 	 * Creates a discrete event to be processed at the specified time.
 	 */
-	DiscreteEvent(TTime time) : time(time)
+	DiscreteEvent(TTime time) : time(time), cancelled(false)
 	{
 	}
 
 	/**
 	 * Processes the discrete event, allowing it to act upon the specific state.
+	 * If cancelled = true, then this method will do nothing.
 	 */
-	virtual void process(TState *state) = 0;
-
+	void process(TState *state);
+	
 	/**
 	 * Compares pointers to discrete events based on their time of occurrence.
 	 * Namely, in a priority_queue, this comparator will always place the

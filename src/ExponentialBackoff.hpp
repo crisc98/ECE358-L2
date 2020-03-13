@@ -41,6 +41,11 @@ public:
 	Bits getNextWaitTime();
 
 	/**
+	 * Returns true if there has at least been one collision.
+	 */
+	bool isBackedOff();
+
+	/**
 	 * Resets the collision counter and power.
 	 */
 	void reset();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TransmissionAttemptEvent.hpp"
+#include "NetworkSimulator.hpp"
 
 /**
  * A class that implements the Visitor Pattern so that it can accept
@@ -14,7 +14,7 @@ class TransmissionAttemptEventAcceptor
 	 * transmit a frame.
 	 */
 	virtual void acceptTransmissionAttemptEvent(
-		TransmissionAttemptEvent *event,
+		Seconds eventArrivalTime,
 		NetworkSimulator *simulator
 	) = 0;
 };

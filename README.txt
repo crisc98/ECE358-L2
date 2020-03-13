@@ -91,3 +91,5 @@ would be acceptable.
 - Changed network topologies to be defined by the addition of various "ChannelConnection" instances
   to each "Node". Instead of having a dedicated "UniformBus" class, the "UniformBusSimulatorConfigurer"
   will build a bus network accordingly.
+- Added a "cancelled" flag to the "DiscreteEvent<>" class to allow events to be ignored instead of
+  going through the difficulty of removing them from the priority queue before they have been reached.

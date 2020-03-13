@@ -15,36 +15,6 @@
  */
 class NetworkSimulator : public DiscreteEventSimulator<Seconds, NetworkSimulator>
 {
-private:
-	/**
-	 * ~Transforms the network's nodes list into a min heap.
-	 */
-	void sortNodes();
-
-	/**
-	 * ~Obtains the pointer to the next node to attempt to transmit a frame.
-	 */
-	Node* getSenderNode();
-
-	const bool TRANSMITTED = true;
-	const bool DROPPED = false;
-
-	/**
-	 * ~Pops the frame at the front of the current sending node's frame queue
-	 * while maintaining the min heap of nodes.
-	 * This is only done after the node's frame has been successfully transmitted
-	 * without collision, or if it has been dropped.
-	 */
-	void popSenderFrame(bool transmittedOrDropped);
-
-	/**
-	 * ~Attempts to transmit the sender node's frame, likewise checking if any collisions
-	 * will happen during that transmission.
-	 * Returns true if there are more frames to be transmitted and the simulation duration
-	 * has not yet been exceeded.
-	 */
-	bool attemptTransmission();
-
 public:
 
 	/**
@@ -53,7 +23,22 @@ public:
 	Network *network;
 
 	/**
-	 * ~Creates a simulator for the specified network.
+	 * The total number of attempts across all nodes to transmit a frame.
+	 */
+	Frames totalTransmissionAttempts;
+
+	/**
+	 * The total number of frames to actually be fully and successfully transmitted.
+	 */
+	Frames totalTransmittedFrames;
+
+	/**
+	 * The total number of bits successfully transmitted by the nodes in this network.
+	 */
+	Bits totalTransmittedBits;
+
+	/**
+	 * Creates a simulator for the specified network.
 	 */
 	NetworkSimulator(Network *network) : network(network)
 	{
