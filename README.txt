@@ -79,7 +79,7 @@ would be acceptable.
 
 ***Time Spent***:
 
-~22 hours of pre-deadline work.
+~22 hours of pre-deadline work
 
 2020-03-12:
 
@@ -97,6 +97,7 @@ would be acceptable.
   will build a bus network accordingly.
 - Added a "cancelled" flag to the "DiscreteEvent<>" class to allow events to be ignored instead of
   going through the difficulty of removing them from the priority queue before they have been reached.
+- Changed the totalTransmittedBits counter into a double to handle massive values.
 
 ***Time Spent***:
 
@@ -106,8 +107,9 @@ would be acceptable.
 
 ***Time Spent***:
 
-2.5 hours to fix all compiler and linker errors.
+2.5 hours to fix all compiler and linker errors
 6 hours debugging logic errors
+1 hour testing and gathering/analyzing data (still in progress)
 
 First test commands:
 t 1000 ni 20 a 7 r 1000000 l 1500 d 10 p 2e8 m 0 oc

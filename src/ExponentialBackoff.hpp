@@ -2,7 +2,7 @@
 
 #include <random>
 
-typedef long Bits;
+typedef double Bits;
 typedef long Collisions;
 
 /**

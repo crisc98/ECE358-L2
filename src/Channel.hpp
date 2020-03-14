@@ -1,9 +1,9 @@
 #pragma once
 
+typedef double Bits;
+typedef double BitsPerSecond;
 typedef double MetersPerSecond;
 typedef double Seconds;
-typedef long Bits;
-typedef long BitsPerSecond;
 
 class Channel
 {

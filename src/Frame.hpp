@@ -1,7 +1,7 @@
 #pragma once
 
+typedef double Bits;
 typedef double Seconds;
-typedef long Bits;
 
 /**
  * Represents a single frame to be transmitted from a node at a particular time.

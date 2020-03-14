@@ -6,9 +6,9 @@
 class Node;
 
 typedef double AverageBitsPerSecond;
+typedef double Bits;
 typedef double Percentage;
 typedef double Seconds;
-typedef long Bits;
 typedef long Frames;
 
 /**

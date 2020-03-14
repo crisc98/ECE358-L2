@@ -29,8 +29,8 @@ void showUsage()
 		<< "nu <N upper (long)>\n"
 		<< "ns <N step size (long)>\n"
 		<< "a <average frame arrival rate in frames per second (long)>\n"
-		<< "r <channel transmission rate in bits per second (long)>\n"
-		<< "l <frame length in bits for all frames (long)>\n"
+		<< "r <channel transmission rate in bits per second (double)>\n"
+		<< "l <frame length in bits for all frames (double)>\n"
 		<< "d <distance between adjacent nodes on the bus in meters (double)>\n"
 		<< "p <channel signal propagation speed in meters per second (double)>\n"
 		<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>\n"
@@ -149,12 +149,12 @@ bool validateSettings(
 	}
 	if (channelTransmissionRate <= 0)
 	{
-		std::cout << "r <channel transmission rate in bits per second (long)> has not yet been successfully entered.\n\n";
+		std::cout << "r <channel transmission rate in bits per second (double)> has not yet been successfully entered.\n\n";
 		dataMissing = true;
 	}
 	if (frameLength <= 0)
 	{
-		std::cout << "l <frame length in bits for all frames (long)> has not yet been successfully entered.\n\n";
+		std::cout << "l <frame length in bits for all frames (double)> has not yet been successfully entered.\n\n";
 		dataMissing = true;
 	}
 	if (interNodeDistance <= 0)
@@ -364,10 +364,10 @@ int main(int argc, char *argv[])
 			getLong(&bus.averageFrameArrivalRate, REQUIRE_POSITIVE, "Invalid average frame arrival rate (a); please enter a valid positive nonzero integer (long) in frames per second.\n\n");
 			break;
 		case 'r': // set the channel transmission rate
-			getLong(&bus.channelTransmissionRate, REQUIRE_POSITIVE, "Invalid channel transmission rate (r); please enter a valid positive nonzero integer (long) in bits per second.\n\n");
+			getDouble(&bus.channelTransmissionRate, REQUIRE_POSITIVE, "Invalid channel transmission rate (r); please enter a valid positive nonzero integer (double) in bits per second.\n\n");
 			break;
 		case 'l': // set the frame length for all frames
-			getLong(&bus.frameLength, REQUIRE_POSITIVE, "Invalid frame length (l); please enter a valid positive nonzero integer (long) in bits.\n\n");
+			getDouble(&bus.frameLength, REQUIRE_POSITIVE, "Invalid frame length (l); please enter a valid positive nonzero integer (double) in bits.\n\n");
 			break;
 		case 'd': // set the inter-node distance
 			getDouble(&bus.interNodeDistance, REQUIRE_POSITIVE, "Invalid inter-node distance (d); please enter a valid positive nonzero decimal value (double) in meters.\n\n");
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
 		case 'm': // set the persistence mode (persistent versus non-persistent)
 		{
 			long persistenceModeSelect = 0;
-			if (getLong(&persistenceModeSelect, ALLOW_NEGATIVE, "Invalid frame length (l); please enter a valid positive nonzero integer (long) in bits.\n\n"))
+			if (getLong(&persistenceModeSelect, ALLOW_NEGATIVE, "Invalid mode selection (m); please enter a valid integer (long), 0 for persistent, all others for non-persistent.\n\n"))
 			{
 				persistent = persistenceModeSelect == 0;
 
@@ -398,8 +398,8 @@ int main(int argc, char *argv[])
 				<< "nu <N upper (long)>: " << nodesUpper << "\n"
 				<< "ns <N step size (long)>: " << nodesStep << "\n"
 				<< "a <average frame arrival rate in frames per second (long)>: " << bus.averageFrameArrivalRate << "\n"
-				<< "r <channel transmission rate in bits per second (long)>: " << bus.channelTransmissionRate << "\n"
-				<< "l <frame length in bits for all frames (long)>: " << bus.frameLength << "\n"
+				<< "r <channel transmission rate in bits per second (double)>: " << bus.channelTransmissionRate << "\n"
+				<< "l <frame length in bits for all frames (double)>: " << bus.frameLength << "\n"
 				<< "d <distance between adjacent nodes on the bus in meters (double)>: " << bus.interNodeDistance << "\n"
 				<< "p <channel signal propagation speed in meters per second (double)>: " << bus.channelPropagationSpeed << "\n"
 				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n\n"
