@@ -18,6 +18,12 @@ private:
 	bool persistent;
 
 	/**
+	 * Indicates whether the node is currently waiting for the channel to go idle in
+	 * the persistent case.
+	 */
+	bool isCurrentlyWaiting;
+
+	/**
 	 * The exponential backoff logic and state shared between the persistent and
 	 * non-persistent CSMA/CD MAC protocol implementations.
 	 */
@@ -82,10 +88,11 @@ public:
 	 */
 	CSMACDNode(
 		NodeNumber number,
-		Channel *channel,
+		Channel channel,
 		bool persistent
 	) : 
-		Node(number, channel)
+		Node(number, channel),
+		isCurrentlyWaiting(false)
 	{
 		if (persistent) nonPersistentBackoff = nullptr;
 		else nonPersistentBackoff = new ExponentialBackoff();

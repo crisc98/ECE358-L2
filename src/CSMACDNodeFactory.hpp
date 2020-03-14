@@ -19,5 +19,5 @@ public:
 	/**
 	 * Creates a Node instance that implements the CSMA/CD MAC protocol.
 	 */
-	Node* createNode(NodeNumber number, Channel *channel);
+	Node* createNode(NodeNumber number, Channel channel);
 };

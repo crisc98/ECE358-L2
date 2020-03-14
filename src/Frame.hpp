@@ -25,7 +25,7 @@ public:
 		Seconds timeCreated,
 		Bits length
 	) :
-		arrivalTime(arrivalTime),
+		arrivalTime(timeCreated),
 		length(length)
 	{
 	}

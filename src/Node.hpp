@@ -27,6 +27,7 @@ class Node :
 	public TransmissionStopEventAcceptor
 {
 private:
+protected:
 
 	/**
 	 * The set of frames that have been scheduled to arrive at and be transmitted
@@ -34,17 +35,11 @@ private:
 	 */
 	std::queue<Frame> frames;
 
-	/**
-	 *
-	 */
-	Seconds timeOfLastTransmission;
-
-protected:
 	
 	/**
 	 * The parameters of the channel that this node is connected to.
 	 */
-	Channel *channel;
+	Channel channel;
 	
 	/**
 	 * The number of nodes (excluding this node) whose channel assertions have
@@ -161,42 +156,13 @@ public:
 	std::vector<ChannelConnection*> connections;
 
 	/**
-	 * The total number of frames to have been generated at this node within the simulation's duration.
-	 */
-	Frames totalFrames;
-
-	/**
-	 * The total number of times that this node attempted to transmit a frame.
-	 */
-	Frames totalTransmissionAttempts;
-
-	/**
-	 * The total number of frames to actually be successfully transmitted.
-	 */
-	Frames totalTransmittedFrames;
-
-	/**
-	 * The total number of bits successfully transmitted by this node.
-	 */
-	Bits totalTransmittedBits;
-
-	/**
-	 * The projected time at which the frame at the front of this node's frame queue will be transmitted.
-	 */
-	Seconds projectedTimeOfTransmission;
-
-	/**
 	 * Initializes the node's number and initializes all other fields to zero.
 	 */
-	Node(NodeNumber number, Channel *channel) :
+	Node(NodeNumber number, Channel channel) :
 		number(number),
 		channel(channel),
 		numIncomingSignals(0),
-		totalFrames(0),
-		totalTransmissionAttempts(0),
-		totalTransmittedFrames(0),
-		totalTransmittedBits(0),
-		projectedTimeOfTransmission(0),
+		isCurrentlyTransmitting(false),
 		currentTransmissionStopEvent(nullptr)
 	{
 	}

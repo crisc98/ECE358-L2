@@ -227,7 +227,7 @@ void runAnalysis(
 
 		// write the current settings to the output as a CSV row with header
 		*output
-			<< "t,ni,nl,nu,ns,a,r,l,d,m\n"
+			<< "t,ni,nl,nu,ns,a,r,l,d,p,m\n"
 			<< simulationDuration << ","
 			<< nodesSingle << ","
 			<< nodesLower << ","
@@ -237,6 +237,7 @@ void runAnalysis(
 			<< channelTransmissionRate << ","
 			<< frameLength << ","
 			<< interNodeDistance << ","
+			<< channelPropagationSpeed << ","
 			<< ((persistent) ? "" : "non-") << "persistent\n\n"
 			<< std::flush;
 
@@ -266,7 +267,7 @@ void runAnalysis(
 			delete fileOutput;
 		}
 
-		std::cout << "Simulation execution complete.\n\n" << std::flush;
+		std::cout << "\nSimulation execution complete.\n\n" << std::flush;
 	}
 }
 
@@ -387,6 +388,7 @@ int main(int argc, char *argv[])
 				 */
 				nodeFactory.persistent = persistent;
 			}
+			break;
 		}
 		case 's': // show the settings
 			std::cout
@@ -400,7 +402,7 @@ int main(int argc, char *argv[])
 				<< "l <frame length in bits for all frames (long)>: " << bus.frameLength << "\n"
 				<< "d <distance between adjacent nodes on the bus in meters (double)>: " << bus.interNodeDistance << "\n"
 				<< "p <channel signal propagation speed in meters per second (double)>: " << bus.channelPropagationSpeed << "\n"
-				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n"
+				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n\n"
 				<< std::flush;
 			break;
 		case 'o': // run the simulation and output the results

@@ -1,6 +1,7 @@
 #include "Node.hpp"
 
 #include <algorithm>
+#include <assert.h>
 
 /**
  * Attempts to transmit the current frame at the front of the frame queue;
@@ -12,6 +13,11 @@ void Node::attemptTransmission(
 )
 {
 	++simulator->network->totalTransmissionAttempts;
+	
+	if (!hasFrames() || (frames.size() < 3))
+	{
+		int i = 0;
+	}
 
 	/**
 	 * Notify all other nodes that this node has started transmitting its frame,
@@ -24,7 +30,8 @@ void Node::attemptTransmission(
 	 * transmitting; the node's transmission may be interrupted before its completion.
 	 */
 	Frame currentFrame = peekFrame();
-	Seconds transmissionDelay = channel->getTransmissionDelay(currentFrame.length);
+	assert(transmissionStartTime >= currentFrame.arrivalTime);
+	Seconds transmissionDelay = channel.getTransmissionDelay(currentFrame.length);
 	Seconds transmissionStopTime = transmissionStartTime + transmissionDelay;
 	currentTransmissionStopEvent = new TransmissionStopEvent(transmissionStopTime, this);
 	simulator->addEvent(currentTransmissionStopEvent);
@@ -82,6 +89,12 @@ void Node::popFrame(
 	NetworkSimulator *simulator
 )
 {
+	if (frames.size() == 1)
+	{
+		int i = 0;
+	}
+
+	// this method should never ever be entered if the frame queue was already empty
 	frames.pop();
 
 	if (hasFrames())
@@ -150,6 +163,11 @@ void Node::acceptTransmissionAttemptEvent(
 	NetworkSimulator *simulator
 )
 {
+	if (!hasFrames() || (frames.size() < 3))
+	{
+		int i = 0;
+	}
+
 	Seconds processingDelay;
 	bool result = shouldTransmit(eventArrivalTime, processingDelay, simulator);
 	if (result) attemptTransmission(eventArrivalTime + processingDelay, simulator);
@@ -168,6 +186,11 @@ void Node::acceptTransmissionStopEvent(
 	NetworkSimulator *simulator
 )
 {
+	if (!hasFrames() || (frames.size() < 3))
+	{
+		int i = 0;
+	}
+
 	/**
 	 * Notify all other nodes that this node has finished transmitting its frame,
 	 * taking into account the propagation delays.
@@ -197,7 +220,6 @@ void Node::acceptTransmissionStopEvent(
 void Node::addFrame(Frame frame)
 {
 	frames.push(frame);
-	++totalFrames;
 }
 
 /**

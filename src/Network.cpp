@@ -24,10 +24,15 @@ AverageBitsPerSecond Network::getThroughput(Seconds simulationDuration)
 }
 
 /**
- * Removes and deletes all nodes from the network.
+ * Removes all nodes from the network and resets all of the statistical counters.
+ * Must be called before running a simulation on this network or configuring its nodes.
  */
 void Network::reset()
 {
+	totalTransmissionAttempts = 0;
+	totalTransmittedFrames = 0;
+	totalTransmittedBits = 0;
+
 	for (Node *node : nodes) delete node;
 	nodes.clear();
 }

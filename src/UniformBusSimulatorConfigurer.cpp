@@ -37,7 +37,7 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 
 	for (int i = 0; i < nodes; ++i)
 	{
-		Node *node = nodeFactory->createNode(i, &channel);
+		Node *node = nodeFactory->createNode(i, channel);
 
 		// give the network data structure the responsibility of destroying the node
 		simulator->network->nodes.push_back(node);

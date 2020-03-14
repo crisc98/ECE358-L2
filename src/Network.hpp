@@ -56,9 +56,10 @@ public:
 	 * the simulation's duration.
 	 */
 	AverageBitsPerSecond getThroughput(Seconds simulationDuration);
-
+	
 	/**
-	 * Removes all nodes from the network.
+	 * Removes all nodes from the network and resets all of the statistical counters.
+	 * Must be called before running a simulation on this network or configuring its nodes.
 	 */
 	void reset();
 

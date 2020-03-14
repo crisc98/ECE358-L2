@@ -15,14 +15,21 @@ void CSMACDNode::performExponentialBackoff(
 	{
 		// the maximum number of collisions has been succeeded such that we must drop the frame
 		popFrame(backoffStart, simulator);
+		backoffState->reset();
 	}
 	else
 	{
+
+		if (!hasFrames() || (frames.size() < 3))
+		{
+			int i = 0;
+		}
+
 		/**
 		 * Register an event for the node to attempt to transmit the current frame again after
 		 * the current backoff time.
 		 */
-		Seconds backoffDelay = ((double)waitTime) / channel->channelTransmissionRate;
+		Seconds backoffDelay = ((double)waitTime) / channel.channelTransmissionRate;
 		Seconds transmissionAttemptTime = backoffStart + backoffDelay;
 		TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
 		simulator->addEvent(transmissionAttemptEvent);
@@ -37,6 +44,11 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
 	NetworkSimulator *simulator
 )
 {
+	if (!hasFrames() || (frames.size() < 3))
+	{
+		int i = 0;
+	}
+
 	if (isCurrentlyTransmitting)
 	{
 		// a collision was detected
@@ -58,6 +70,11 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
 		currentTransmissionStopEvent->cancelled = true;
 		currentTransmissionStopEvent = nullptr;
 
+		if (!hasFrames())
+		{
+			int i = 0;
+		}
+
 		performExponentialBackoff(transmissionStopTime, &defaultBackoff, simulator);
 	}
 }
@@ -71,14 +88,21 @@ void CSMACDNode::acceptChannelBusyStopEventImplementation(
 	NetworkSimulator *simulator
 )
 {
-	/**
-	 * If the node last sensed the channel as being busy (isn't currently backed off
-	 * for some delay time after a collision, the CSMA/CD scheme is persistent, and
-	 * the channel became idle after the arrival of this event, and immediately
-	 * attempt to transmit the current frame.
-	 */
-	bool isBackedOff = defaultBackoff.isBackedOff();
-	if (!isBackedOff && persistent && !channelIsBusy()) attemptTransmission(transmissionStopTime, simulator);
+	if (hasFrames())
+	{
+		/**
+		 * If the node last sensed the channel as being busy, isn't currently backed off
+		 * for some delay time after a collision, the CSMA/CD scheme is persistent, and
+		 * the channel became idle after the arrival of this event, immediately attempt
+		 * to transmit the current frame.
+		 */
+		bool isBackedOff = defaultBackoff.isBackedOff();
+		if (isCurrentlyWaiting && !isBackedOff && persistent && !channelIsBusy())
+		{
+			isCurrentlyWaiting = false;
+			attemptTransmission(transmissionStopTime, simulator);
+		}
+	}
 }
 
 /**
@@ -95,7 +119,17 @@ bool CSMACDNode::shouldTransmit(
 
 	if (channelIsBusy())
 	{
-		if (!persistent)
+		if (persistent)
+		{
+			/**
+			 * In the persistent case, we must wait for enough ChannelBusyStopEvent instances
+			 * to have been received such that the channel becomes idle; this simulates the node
+			 * _persistently_ sensing the medium until the exact moment that it becomes idle, at
+			 * which point it will immediately start transmitting.
+			 */
+			isCurrentlyWaiting = true;
+		}
+		else
 		{
 			/**
 			 * In the non-persistent case, if the channel is still busy, we must
@@ -104,17 +138,14 @@ bool CSMACDNode::shouldTransmit(
 			performExponentialBackoff(checkTime + processingDelay, &defaultBackoff, simulator);
 		}
 
-		/**
-		 * In the non-persistent case, we must wait for enough ChannelBusyStopEvent instances
-		 * to have been received such that the channel becomes idle; this simulates the node
-		 * _persistently_ sensing the medium until the exact moment that it becomes idle, at
-		 * which point it will immediately start transmitting.
-		 */
-
 		return false;
 	}
 
-	if (!persistent)
+	if (persistent)
+	{
+		isCurrentlyWaiting = false;
+	}
+	else
 	{
 		/**
 		 * In the non-persistent case, if the channel was not busy, then

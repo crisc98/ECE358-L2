@@ -77,6 +77,10 @@ jamming signal delay.
 Please judge whether a slightly late but working submission of this sophisticated implementation
 would be acceptable.
 
+***Time Spent***:
+
+~22 hours of pre-deadline work.
+
 2020-03-12:
 
 ***Main changes***:
@@ -93,3 +97,17 @@ would be acceptable.
   will build a bus network accordingly.
 - Added a "cancelled" flag to the "DiscreteEvent<>" class to allow events to be ignored instead of
   going through the difficulty of removing them from the priority queue before they have been reached.
+
+***Time Spent***:
+
+~12 hour of post-deadline thought, design and implementation.
+
+2020-03-13:
+
+***Time Spent***:
+
+2.5 hours to fix all compiler and linker errors.
+6 hours debugging logic errors
+
+First test commands:
+t 1000 ni 20 a 7 r 1000000 l 1500 d 10 p 2e8 m 0 oc
