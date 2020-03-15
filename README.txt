@@ -113,3 +113,11 @@ would be acceptable.
 
 First test commands:
 t 1000 ni 20 a 7 r 1000000 l 1500 d 10 p 2e8 m 0 oc
+
+2020-03-14:
+
+***Time Spent***:
+
+3 hours making a UML class diagram summarizing the design and class interactions
+
+adding more statistics and reviewing the logic

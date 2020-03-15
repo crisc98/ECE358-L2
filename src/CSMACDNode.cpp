@@ -135,7 +135,7 @@ bool CSMACDNode::shouldTransmit(
 			 * In the non-persistent case, if the channel is still busy, we must
 			 * perform an exponential backoff.
 			 */
-			performExponentialBackoff(checkTime + processingDelay, &defaultBackoff, simulator);
+			performExponentialBackoff(checkTime + processingDelay, nonPersistentBackoff, simulator);
 		}
 
 		return false;

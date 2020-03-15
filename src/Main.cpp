@@ -40,7 +40,7 @@ void showUsage()
 		<< "q - end the program>\n"
 		<< "h - show this menu\n\n"
 		<< "Inputs are error-checked and will revert the setting to its previous value if there is a problem.\n"
-		<< "All inputs must be positive (except for m) and nonzero.\n"
+		<< "All inputs must be positive and nonzero (except for m).\n"
 		<< "There is currently no support for the representation of instantaneous propagation or transmission times.\n"
 		<< "All settings start at a default, invalid (except for m) value of 0.\n"
 		<< "If nl > nu, they will automatically be flipped once the simulation is started.\n\n"
@@ -272,8 +272,8 @@ void runAnalysis(
 }
 
 /**
- * Encapsulates the main program loop for gathering data about different packet queue
- * configurations' performance.
+ * Encapsulates the main program loop for gathering data about the performance of bus networks
+ * of different sizes using different MAC protocols.
  */
 int main(int argc, char *argv[])
 {
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 		&nodeFactory
 	);
 
-	// uses the experiment configurer to generate statistical data with respect changing numbers of nodes
+	// uses the experiment configurer to generate statistical data with respect to changing numbers of nodes
 	NetworkAnalyzer analyzer(&configurer);
 
 	// simulation settings; these may be updated throughout the session
@@ -304,9 +304,7 @@ int main(int argc, char *argv[])
 	Nodes nodesUpper = 0;
 	Nodes nodesStep = 0;
 	bool persistent = true;
-
-	bool succeeded = false;
-
+	
 	// I/O loop implementing what is described by showUsage()
 	while (true)
 	{
@@ -319,12 +317,14 @@ int main(int argc, char *argv[])
 			getDouble(&simulator.simulationDuration, REQUIRE_POSITIVE, "Invalid simulation duration (d); please enter a valid positive nonzero decimal value (double) in seconds.\n\n");
 			break;
 		case 'n': // set the number of nodes (N) to simulate
+		{
+			bool succeeded = false;
 			std::cin >> input;
 			switch (input)
 			{
 			case 'i': // use a single value of N
 				succeeded = getLong(&nodesSingle, REQUIRE_POSITIVE, "Invalid single value for N (ni); please enter a valid positive nonzero value (double).\n\n");
-				if(succeeded)
+				if (succeeded)
 				{
 					// this option is mutually exclusive of the others
 					nodesLower = 0;
@@ -360,6 +360,7 @@ int main(int argc, char *argv[])
 				std::cout << "Invalid command; enter \'h\' to show the list of commands.\n\n" << std::flush;
 			}
 			break;
+		}
 		case 'a': // set the average frame arrival rate
 			getLong(&bus.averageFrameArrivalRate, REQUIRE_POSITIVE, "Invalid average frame arrival rate (a); please enter a valid positive nonzero integer (long) in frames per second.\n\n");
 			break;
