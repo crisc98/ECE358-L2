@@ -34,6 +34,7 @@ void showUsage()
 		<< "d <distance between adjacent nodes on the bus in meters (double)>\n"
 		<< "p <channel signal propagation speed in meters per second (double)>\n"
 		<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>\n"
+		<< "k <maximum backoff iterations (frame drop theshold; default of 10; long)>\n"
 		<< "s - show the current settings\n"
 		<< "oc - run the simulator and output CSV data to console\n"
 		<< "of <filename without extension> - run the simulator and output CSV data to a file\n"
@@ -42,7 +43,7 @@ void showUsage()
 		<< "Inputs are error-checked and will revert the setting to its previous value if there is a problem.\n"
 		<< "All inputs must be positive and nonzero (except for m).\n"
 		<< "There is currently no support for the representation of instantaneous propagation or transmission times.\n"
-		<< "All settings start at a default, invalid (except for m) value of 0.\n"
+		<< "All settings start at a default, invalid (except for m) value of 0 (except for k).\n"
 		<< "If nl > nu, they will automatically be flipped once the simulation is started.\n\n"
 		<< std::flush;
 }
@@ -190,6 +191,7 @@ void runAnalysis(
 	Meters interNodeDistance,
 	MetersPerSecond channelPropagationSpeed,
 	bool persistent,
+	Collisions maxCollisions,
 	bool outputToFile
 )
 {
@@ -227,7 +229,7 @@ void runAnalysis(
 
 		// write the current settings to the output as a CSV row with header
 		*output
-			<< "t,ni,nl,nu,ns,a,r,l,d,p,m\n"
+			<< "t,ni,nl,nu,ns,a,r,l,d,p,m,k\n"
 			<< simulationDuration << ","
 			<< nodesSingle << ","
 			<< nodesLower << ","
@@ -238,7 +240,8 @@ void runAnalysis(
 			<< frameLength << ","
 			<< interNodeDistance << ","
 			<< channelPropagationSpeed << ","
-			<< ((persistent) ? "" : "non-") << "persistent\n\n"
+			<< ((persistent) ? "" : "non-") << "persistent,"
+			<< maxCollisions << "\n\n"
 			<< std::flush;
 
 		// add statistical data for each N (number of nodes) value as CSV rows with a header
@@ -287,6 +290,7 @@ int main(int argc, char *argv[])
 
 	// set the network experiment configurer to use the CSMA/CD MAC protocol
 	CSMACDNodeFactory nodeFactory;
+	nodeFactory.maxCollisions = 10; // default, statistically _very_ rare
 
 	// configures network experiments for different numbers of nodes
 	UniformBusSimulatorConfigurer configurer(
@@ -391,6 +395,9 @@ int main(int argc, char *argv[])
 			}
 			break;
 		}
+		case 'k': // set the maximum backoff iterations (frame drop threshold)
+			getLong(&nodeFactory.maxCollisions, REQUIRE_POSITIVE, "Invalid maximum backoff iterations (k); please enter a valid positive nonzero integer (long) in iterations.\n\n");
+			break;
 		case 's': // show the settings
 			std::cout
 				<< "Settings:\n\n"
@@ -404,7 +411,8 @@ int main(int argc, char *argv[])
 				<< "l <frame length in bits for all frames (double)>: " << bus.frameLength << "\n"
 				<< "d <distance between adjacent nodes on the bus in meters (double)>: " << bus.interNodeDistance << "\n"
 				<< "p <channel signal propagation speed in meters per second (double)>: " << bus.channelPropagationSpeed << "\n"
-				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n\n"
+				<< "m <0 for persistent (default), any other (e.g. 1) for non-persistent CSMA/CD (long)>: " << ((persistent) ? "" : "non-") << "persistent\n"
+				<< "k <maximum backoff iterations (frame drop theshold; long)>: " << nodeFactory.maxCollisions << "\n\n"
 				<< std::flush;
 			break;
 		case 'o': // run the simulation and output the results
@@ -441,6 +449,7 @@ int main(int argc, char *argv[])
 					bus.interNodeDistance,
 					bus.channelPropagationSpeed,
 					persistent,
+					nodeFactory.maxCollisions,
 					outputToFile
 				);
 			}

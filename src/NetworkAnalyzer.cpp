@@ -87,7 +87,7 @@ void NetworkAnalyzer::gatherDataFor(
 		<< (((double)simulator->network->totalChannelSenses) / ((double)simulator->network->totalVisitedFrames)) << "," // "Tcs/Tvf,"
 		<< simulator->network->totalPostponedFrames << "," // totalPostponedFrames(Tpf),"
 		<< simulator->network->totalWaits << "," // "totalWaits(Tw),"
-		<< (((double)simulator->network->totalWaits) / ((double)simulator->network->totalPostponedFrames)) << "," // "Tw/Tcf,"
+		<< (((double)simulator->network->totalWaits) / ((double)simulator->network->totalPostponedFrames)) << "," // "Tw/Tpf,"
 		<< (((double)simulator->network->totalWaits) / ((double)simulator->network->totalChannelSenses)) << "," // "Tw/Tcs,"
 		<< (((double)simulator->network->totalWaits) / ((double)simulator->network->totalVisitedFrames)) << "," // "Tw/Tvf,"
 		<< simulator->network->totalWaitTime << "," // "totalWaitTime(Twt),"

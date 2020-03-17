@@ -98,13 +98,15 @@ public:
 	CSMACDNode(
 		NodeNumber number,
 		Channel channel,
-		bool persistent
+		bool persistent,
+		Collisions maxCollisions
 	) : 
 		Node(number, channel),
-		isCurrentlyWaiting(false)
+		isCurrentlyWaiting(false),
+		defaultBackoff(maxCollisions)
 	{
 		if (persistent) nonPersistentBackoff = nullptr;
-		else nonPersistentBackoff = new ExponentialBackoff();
+		else nonPersistentBackoff = new ExponentialBackoff(maxCollisions);
 	}
 	
 	/**

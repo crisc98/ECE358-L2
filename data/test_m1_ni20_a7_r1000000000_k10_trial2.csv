@@ -1,0 +1,5 @@
+t,ni,nl,nu,ns,a,r,l,d,p,m,k
+1000,20,0,0,0,7,1e+09,1500,10,2e+08,non-persistent,10
+
+nodes,totalTransmissionAttempts(Tta),totalTransmittedFrames(Ttf),efficiency(Ttf/Tta),totalTransmittedBits(Ttb),throughput(Ttb/t),totalEnqueuedFrames(Tef),Ttf/Tef,totalVisitedFrames(Tvf),Tvf/Tef,Ttf/Tvf,totalChannelSenses(Tcs),Tta/Tcs,Ttf/Tcs,Tcs/Tvf,totalPostponedFrames(Tpf),totalWaits(Tw),Tw/Tpf,Tw/Tcs,Tw/Tvf,totalWaitTime(Twt),averageWaitTime(Twt/Tw),totalNonPersistentDrops(Tnpd),Tnpd/Tpf,Tnpd/Tvf,totalCollidedFrames(Tcf),totalDefaultBackoffs(Tdb),Tdb/Tcf,Tdb/Tcs,Tdb/Tvf,totalDefaultBackoffDelay(Tdbd),averageDefaultBackoffDelay(Tdbd/Tdb),totalCollisionDrops(Tcd),Tcd/Tcf,Tcd/Tvf
+20,98013,97999,0.999857,1.46999e+08,146999,140056,0.699713,98007,0.69977,0.999918,98021,0.999918,0.999776,1.00014,27,27,1,0.000275451,0.000275491,1.69625e-05,6.28242e-07,0,0,0,12,14,1.16667,0.000142827,0.000142847,6.144e-06,4.38857e-07,0,0,0,

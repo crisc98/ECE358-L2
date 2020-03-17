@@ -7,6 +7,6 @@
  */
 Node* CSMACDNodeFactory::createNode(NodeNumber number, Channel channel)
 {
-	Node *node = new CSMACDNode(number, channel, persistent);
+	Node *node = new CSMACDNode(number, channel, persistent, maxCollisions);
 	return node;
 }

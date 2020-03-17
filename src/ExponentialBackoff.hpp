@@ -23,8 +23,8 @@ private:
 
 public:
 
-	ExponentialBackoff() :
-		maxCollisions(10),
+	ExponentialBackoff(Collisions maxCollisions) :
+		maxCollisions(maxCollisions),
 		collisions(0),
 		baseWaitTime(512),
 		power(2),

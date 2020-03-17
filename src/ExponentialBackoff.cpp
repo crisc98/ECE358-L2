@@ -9,7 +9,7 @@
 Bits ExponentialBackoff::getNextWaitTime()
 {
 	++collisions;
-	if (collisions > 10)
+	if (collisions > maxCollisions)
 	{
 		return -1;
 	}
