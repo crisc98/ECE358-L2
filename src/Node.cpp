@@ -108,7 +108,11 @@ void Node::popFrame(
 		Frame currentFrame = peekFrame();
 		Seconds transmissionAttemptTime = std::max(currentFrame.arrivalTime, transmissionStopTime);
 		TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
-		simulator->addEvent(transmissionAttemptEvent);
+		bool isWithinSimulationDuration = simulator->addEvent(transmissionAttemptEvent);
+		if(isWithinSimulationDuration)
+		{
+			++simulator->network->totalVisitedFrames;
+		}
 	}
 }
 
@@ -220,6 +224,16 @@ void Node::acceptTransmissionStopEvent(
 void Node::addFrame(Frame frame)
 {
 	frames.push(frame);
+}
+
+
+/**
+ * Returns the current number of frames in this node's frame queue.
+ */
+Frames Node::frameCount()
+{
+	Frames result = frames.size();
+	return result;
 }
 
 /**

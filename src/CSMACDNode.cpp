@@ -3,8 +3,11 @@
 /**
  * Performs an exponential backoff using the specific state instance and registers
  * a new transmission attempt event to be processed after the backoff has finished.
+ * 
+ * Returns the backoff delay, else a -1 if the number of collisions has already been
+ * exceeded.
  */
-void CSMACDNode::performExponentialBackoff(
+Seconds CSMACDNode::performExponentialBackoff(
 	Seconds backoffStart,
 	ExponentialBackoff *backoffState,
 	NetworkSimulator *simulator
@@ -16,24 +19,19 @@ void CSMACDNode::performExponentialBackoff(
 		// the maximum number of collisions has been succeeded such that we must drop the frame
 		popFrame(backoffStart, simulator);
 		backoffState->reset();
+		return -1;
 	}
-	else
-	{
 
-		if (!hasFrames() || (frames.size() < 3))
-		{
-			int i = 0;
-		}
+	/**
+	 * Register an event for the node to attempt to transmit the current frame again after
+	 * the current backoff time.
+	 */
+	Seconds backoffDelay = ((double)waitTime) / channel.channelTransmissionRate;
+	Seconds transmissionAttemptTime = backoffStart + backoffDelay;
+	TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
+	simulator->addEvent(transmissionAttemptEvent);
 
-		/**
-		 * Register an event for the node to attempt to transmit the current frame again after
-		 * the current backoff time.
-		 */
-		Seconds backoffDelay = ((double)waitTime) / channel.channelTransmissionRate;
-		Seconds transmissionAttemptTime = backoffStart + backoffDelay;
-		TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, this);
-		simulator->addEvent(transmissionAttemptEvent);
-	}
+	return backoffDelay;
 }
 
 /**
@@ -44,11 +42,6 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
 	NetworkSimulator *simulator
 )
 {
-	if (!hasFrames() || (frames.size() < 3))
-	{
-		int i = 0;
-	}
-
 	if (isCurrentlyTransmitting)
 	{
 		// a collision was detected
@@ -70,12 +63,21 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
 		currentTransmissionStopEvent->cancelled = true;
 		currentTransmissionStopEvent = nullptr;
 
-		if (!hasFrames())
+		// perform an exponential backoff and increment the corresponding statistics counters
+		if (!defaultBackoff.isBackedOff())
 		{
-			int i = 0;
+			++simulator->network->totalCollidedFrames;
 		}
-
-		performExponentialBackoff(transmissionStopTime, &defaultBackoff, simulator);
+		Seconds backoffDelay = performExponentialBackoff(transmissionStopTime, &defaultBackoff, simulator);
+		if (backoffDelay < 0)
+		{
+			++simulator->network->totalCollisionDrops;
+		}
+		else
+		{
+			++simulator->network->totalDefaultBackoffs;
+			simulator->network->totalDefaultBackoffDelay += backoffDelay;
+		}
 	}
 }
 
@@ -84,7 +86,7 @@ void CSMACDNode::acceptChannelBusyStartEventImplementation(
  * channel went idle and responding accordingly.
  */
 void CSMACDNode::acceptChannelBusyStopEventImplementation(
-	Seconds transmissionStopTime,
+	Seconds eventArrivalTime,
 	NetworkSimulator *simulator
 )
 {
@@ -100,7 +102,9 @@ void CSMACDNode::acceptChannelBusyStopEventImplementation(
 		if (isCurrentlyWaiting && !isBackedOff && persistent && !channelIsBusy())
 		{
 			isCurrentlyWaiting = false;
-			attemptTransmission(transmissionStopTime, simulator);
+			Seconds totalWaitTime = eventArrivalTime - lastWaitStart;
+			simulator->network->totalWaitTime += totalWaitTime;
+			attemptTransmission(eventArrivalTime, simulator);
 		}
 	}
 }
@@ -115,6 +119,8 @@ bool CSMACDNode::shouldTransmit(
 	NetworkSimulator *simulator
 )
 {
+	++simulator->network->totalChannelSenses;
+
 	processingDelay = 0; // should we want to take this account
 
 	if (channelIsBusy())
@@ -127,7 +133,13 @@ bool CSMACDNode::shouldTransmit(
 			 * _persistently_ sensing the medium until the exact moment that it becomes idle, at
 			 * which point it will immediately start transmitting.
 			 */
-			isCurrentlyWaiting = true;
+			if (!isCurrentlyWaiting)
+			{
+				isCurrentlyWaiting = true;
+				++simulator->network->totalPostponedFrames;
+			}
+			++simulator->network->totalWaits;
+			lastWaitStart = checkTime + processingDelay;
 		}
 		else
 		{
@@ -135,7 +147,20 @@ bool CSMACDNode::shouldTransmit(
 			 * In the non-persistent case, if the channel is still busy, we must
 			 * perform an exponential backoff.
 			 */
-			performExponentialBackoff(checkTime + processingDelay, nonPersistentBackoff, simulator);
+			if (!nonPersistentBackoff->isBackedOff())
+			{
+				++simulator->network->totalPostponedFrames;
+			}
+			Seconds backoffDelay = performExponentialBackoff(checkTime + processingDelay, nonPersistentBackoff, simulator);
+			if (backoffDelay < 0)
+			{
+				++simulator->network->totalNonPersistentDrops;
+			}
+			else
+			{
+				++simulator->network->totalWaits;
+				simulator->network->totalWaitTime += backoffDelay;
+			}
 		}
 
 		return false;
@@ -162,7 +187,7 @@ bool CSMACDNode::shouldTransmit(
  * success per the CSMA/CD MAC protocol.
  */
 void CSMACDNode::acceptTransmissionStopEventImplementation(
-	Seconds eventArrivalTime,
+	Seconds transmissionStopTime,
 	NetworkSimulator *simulator
 )
 {

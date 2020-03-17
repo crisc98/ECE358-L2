@@ -24,6 +24,12 @@ private:
 	bool isCurrentlyWaiting;
 
 	/**
+	 * The time in the persistent case that the node last started waiting for the channel
+	 * to become busy.
+	 */
+	Seconds lastWaitStart;
+
+	/**
 	 * The exponential backoff logic and state shared between the persistent and
 	 * non-persistent CSMA/CD MAC protocol implementations.
 	 */
@@ -37,8 +43,11 @@ private:
 	/**
 	 * Performs an exponential backoff using the specific state instance and registers
 	 * a new transmission attempt event to be processed after the backoff has finished.
+	 * 
+	 * Returns the backoff delay, else a -1 if the number of collisions has already been
+	 * exceeded.
 	 */
-	void performExponentialBackoff(
+	Seconds performExponentialBackoff(
 		Seconds backoffStart,
 		ExponentialBackoff *backoffState,
 		NetworkSimulator *simulator

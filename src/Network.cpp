@@ -19,7 +19,7 @@ Percentage Network::getEfficiency()
  */
 AverageBitsPerSecond Network::getThroughput(Seconds simulationDuration)
 {
-	AverageBitsPerSecond throughput = ((double)totalTransmittedBits) / simulationDuration;
+	AverageBitsPerSecond throughput = totalTransmittedBits / simulationDuration;
 	return throughput;
 }
 
@@ -29,9 +29,20 @@ AverageBitsPerSecond Network::getThroughput(Seconds simulationDuration)
  */
 void Network::reset()
 {
+	totalEnqueuedFrames = 0;
+	totalVisitedFrames = 0;
+	totalChannelSenses = 0;
 	totalTransmissionAttempts = 0;
 	totalTransmittedFrames = 0;
 	totalTransmittedBits = 0;
+	totalPostponedFrames = 0;
+	totalWaits = 0;
+	totalWaitTime = 0;
+	totalNonPersistentDrops = 0;
+	totalCollidedFrames = 0;
+	totalDefaultBackoffs = 0;
+	totalDefaultBackoffDelay = 0;
+	totalCollisionDrops = 0;
 
 	for (Node *node : nodes) delete node;
 	nodes.clear();

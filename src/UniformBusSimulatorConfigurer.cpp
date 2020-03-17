@@ -70,6 +70,8 @@ NetworkSimulator* UniformBusSimulatorConfigurer::configureNetworkSimulationFor(N
 			Seconds transmissionAttemptTime = firstFrame.arrivalTime;
 			TransmissionAttemptEvent *transmissionAttemptEvent = new TransmissionAttemptEvent(transmissionAttemptTime, node);
 			simulator->addEvent(transmissionAttemptEvent);
+			++simulator->network->totalVisitedFrames;
+			simulator->network->totalEnqueuedFrames += node->frameCount();
 		}
 	}
 

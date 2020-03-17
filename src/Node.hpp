@@ -215,6 +215,11 @@ public:
 	void addFrame(Frame frame);
 
 	/**
+	 * Returns the current number of frames in this node's frame queue.
+	 */
+	Frames frameCount();
+
+	/**
 	 * Returns true if there are frames left in the queue to be transmitted.
 	 */
 	bool hasFrames();

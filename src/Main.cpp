@@ -394,6 +394,7 @@ int main(int argc, char *argv[])
 		case 's': // show the settings
 			std::cout
 				<< "Settings:\n\n"
+				<< "t <simulation duration in seconds (double)>: " << simulator.simulationDuration << "\n"
 				<< "ni <use a single value of N (number of nodes on bus; long)>: " << nodesSingle << "\n"
 				<< "nl <N lower (long)>: " << nodesLower << "\n"
 				<< "nu <N upper (long)>: " << nodesUpper << "\n"

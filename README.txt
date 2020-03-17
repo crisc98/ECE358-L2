@@ -120,4 +120,9 @@ t 1000 ni 20 a 7 r 1000000 l 1500 d 10 p 2e8 m 0 oc
 
 3 hours making a UML class diagram summarizing the design and class interactions
 
-adding more statistics and reviewing the logic
+2020-03-16:
+
+***Time Spent***:
+
+2 hours adding more statistics
+1 hour acquiring default data
